@@ -4,7 +4,7 @@ DARK_MODE_CHOICES = (
 
 
 SEMESTER_CHOICES = (
-    ("I", "I"), ("II", "II"), ("III", "III"),
+    ("I", "I"), ("II", "II"),
 )
 
 COURSE_TYPE_CHOICES = (

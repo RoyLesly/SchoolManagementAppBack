@@ -2,7 +2,9 @@ from django.db import models
 from django.db.models.signals import post_save
 from user_control.models import CustomUser, UserProfile
 from user_control.choices import SEMESTER_CHOICES, COURSE_TYPE_CHOICES
-# from app_control.functions import create_result_from_course
+from datetime import date, datetime
+from django.utils import timezone
+
 
 def getCustomUserPerms(id):
     return CustomUser.objects.get(id=id).get_all_permissions()
@@ -100,6 +102,9 @@ class Course(models.Model):
     course_credit = models.IntegerField(blank=False)
     completed = models.BooleanField(default=False)
     assigned = models.BooleanField(default=False)
+    paid = models.BooleanField(default=False)
+    hours = models.IntegerField(default=0)
+    date_assigned = models.DateField(blank=True, null=True)
     assigned_to = models.ForeignKey(CustomUser, null=True, blank=True, related_name='course_lecturer', on_delete=models.SET_NULL)
     created_by = models.ForeignKey(CustomUser, null=True, related_name='course_created_by', on_delete=models.SET_NULL)
     created_at = models.DateField(auto_now_add=True)
@@ -132,7 +137,7 @@ class Result(models.Model):
     updated_at = models.DateField(auto_now=True)
 
     def __str__(self):
-        return f"{self.id} {self.student.first_name}-{self.course.main_course.course_name}"
+        return f"{self.id} {self.student.user.first_name}-{self.course.main_course.course_name}"
     
     class Meta:
         constraints = [ models.UniqueConstraint(fields=["course", "student"], name="unique_result") ]

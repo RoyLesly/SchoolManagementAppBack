@@ -97,21 +97,13 @@ class CourseSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer(read_only=True)
     user_id = serializers.CharField(write_only=True, required=True)
+    specialty = SpecialtySerializer(read_only=True)
+    specialty_id = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = UserProfile
         fields = "__all__"
         dept = 1
-
-
-class UserProfileLecturerSerializer(UserProfileSerializer):
-    pass
-    # level_id = serializers.CharField(write_only=True, required=False)
-
-
-class UserProfileStudentSerializer(UserProfileSerializer):
-    specialty = SpecialtySerializer(read_only=True)
-    specialty_id = serializers.CharField(write_only=True, required=False)
 
 
 class ResultSerializer(serializers.ModelSerializer):

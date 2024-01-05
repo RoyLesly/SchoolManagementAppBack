@@ -6,7 +6,7 @@ from django.contrib.auth.admin import UserAdmin
 @admin.register(CustomUser)
 class CustomUserAdminConfig(admin.ModelAdmin):
     # model = CustomUser
-    list_display = (  'id', 'username', "first_name", "last_name", "role", "email", "email_confirmed", 
+    list_display = (  'id', 'matricle', 'username', "first_name", "last_name", "role", "email", "email_confirmed", 
                     "hod", "sex", "address", "telephone", "title", "dob", )
     search_fields = ('username',)
 
@@ -25,7 +25,7 @@ class AppearanceAdmin(admin.ModelAdmin):
 
 @admin.register(PasswordToken)
 class PasswordTokenAdmin(admin.ModelAdmin):
-    list_display = ("id", "user_profile", "token", "expired", "sent_mail", "created_at", "updated_at")
+    list_display = ("id", "user", "token", "expired", "sent_mail", "created_at", "updated_at")
     search_fields = ("", "id",)
 
 

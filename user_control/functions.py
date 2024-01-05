@@ -1,6 +1,38 @@
 import importlib
 from django.core.mail import send_mail
 from django.conf import settings
+from datetime import datetime
+
+
+now = datetime.now()
+# date = now().date()
+# time = now().time()
+
+
+def generate_matricle(sender, **kwargs):
+    module_custom_user = importlib.import_module("user_control").models.CustomUser
+    all_users_this_year = module_custom_user.objects.filter(created_at__year=now.strftime("%Y"))
+    instance = kwargs["instance"]
+    pref = str(now.strftime("%Y")[2: 4]) + "SJH"
+    if kwargs["created"]:
+        if all_users_this_year:
+            mat = [f.matricle for f in all_users_this_year if "SJH" in f.matricle]
+            strip_mat = [int(i[5:]) for i in mat]
+            try:  
+                if (len(strip_mat) > 0) :         
+                    mat = pref + str(strip_mat[-1] + 1).zfill(4) 
+                else:
+                    mat = pref + str(instance.id).zfill(4)
+            except:
+                mat = pref + str(instance.id).zfill(4)
+        else:
+            mat = pref + str(instance.id).zfill(4)
+        if (instance.role == "student"):
+            instance.matricle = mat
+            instance.save()
+        else:
+            instance.matricle = instance.id
+            instance.save()
 
 
 def create_profile(sender, **kwargs):
@@ -9,7 +41,6 @@ def create_profile(sender, **kwargs):
     if kwargs['created']:
         prof = module_user_profile.objects.create(
                 user = created_item,
-                # created_by = created_item.created_by,
             )
         prof.save()
 
@@ -80,7 +111,7 @@ def send_email_update(sender, **kwargs):
 
 def send_token_to_email(instance, **kwargs):
     if instance:
-        if not instance.user_profile.email:
+        if not instance.user.email:
             raise Exception("User Has No Email")
         subject = 'st-joan Account Password Reset'        
         try:

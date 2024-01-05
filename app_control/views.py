@@ -1,6 +1,6 @@
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.response import Response
-from back.utils import get_query, CustomPagination
+from back.utils import get_query, querydict_to_dict, CustomPagination
 from .serializers import (
     Domain, DomainSerializer, MainSpecialty, Specialty, MainCourse, Course, Level,
     MainSpecialtySerializer, SpecialtySerializer, MainCourseSerializer, CourseSerializer,
@@ -14,21 +14,29 @@ class DomainView(ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
     queryset = Domain.objects.all().order_by("-created_at")
     serializer_class = DomainSerializer
-    pagination_class = CustomPagination       # This limits to 100
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
         if self.request.method.lower() != "get":
             return self.queryset
-        data = self.request.query_params.dict()
+        data = querydict_to_dict(self.request.query_params)
         data.pop("page", None)
-        keyword = data.pop("keyword", None)
-        results = self.queryset#.filter(**data)
+        searchField = data.pop("searchField", None)
+        searchFieldArray = data.pop("searchField[]", None)
+        value = data.pop("value", None)
+        valueArray = data.pop("value[]", None)
+        results = self.queryset
 
-        if keyword:
-            search_fields = ("")
-            query = get_query(keyword, search_fields)
-            results = results.filter(query)
+        if searchField:
+            if value:
+                query = get_query(value, [searchField])
+                results = results.filter(query)
+        if searchFieldArray:
+            if valueArray:
+                query = get_query(valueArray, searchFieldArray)
+                print(query, "MY QUERY")
+                results = results.filter(query)
+
         return results
     
     def create(self, request, *args, **kwargs):
@@ -70,23 +78,30 @@ class DomainView(ModelViewSet):
 
 class MainSpecialtyView(ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
-    queryset = MainSpecialty.objects.all().order_by("-created_at")
+    queryset = MainSpecialty.objects.all().order_by("-id")
     serializer_class = MainSpecialtySerializer
-    pagination_class = CustomPagination       # This limits to 100
+    pagination_class = CustomPagination
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
         if self.request.method.lower() != "get":
             return self.queryset
-        data = self.request.query_params.dict()
+        data = querydict_to_dict(self.request.query_params)
         data.pop("page", None)
-        keyword = data.pop("keyword", None)
-        results = self.queryset#.filter(**data)
+        searchField = data.pop("searchField", None)
+        searchFieldArray = data.pop("searchField[]", None)
+        value = data.pop("value", None)
+        valueArray = data.pop("value[]", None)
+        results = self.queryset
 
-        if keyword:
-            search_fields = ("")
-            query = get_query(keyword, search_fields)
-            results = results.filter(query)
+        if searchField:
+            if value:
+                query = get_query(value, [searchField])
+                results = results.filter(query)
+        if searchFieldArray:
+            if valueArray:
+                query = get_query(valueArray, searchFieldArray)
+                results = results.filter(query)
         return results
     
     def create(self, request, *args, **kwargs):
@@ -130,21 +145,28 @@ class SpecialtyView(ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
     queryset = Specialty.objects.all().order_by("-academic_year")
     serializer_class = SpecialtySerializer
-    pagination_class = CustomPagination       # This limits to 100
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
         if self.request.method.lower() != "get":
             return self.queryset
-        data = self.request.query_params.dict()
+        data = querydict_to_dict(self.request.query_params)
         data.pop("page", None)
-        keyword = data.pop("keyword", None)
-        results = self.queryset#.filter(**data)
+        searchField = data.pop("searchField", None)
+        searchFieldArray = data.pop("searchField[]", None)
+        value = data.pop("value", None)
+        valueArray = data.pop("value[]", None)
+        results = self.queryset
 
-        if keyword:
-            search_fields = ("")
-            query = get_query(keyword, search_fields)
-            results = results.filter(query)
+        if searchField:
+            if value:
+                query = get_query(value, [searchField])
+                results = results.filter(query)
+        if searchFieldArray:
+            if valueArray:
+                query = get_query(valueArray, searchFieldArray)
+                print(query, "MY QUERY")
+                results = results.filter(query)
         return results
     
     def create(self, request, *args, **kwargs):
@@ -188,21 +210,28 @@ class MainCourseView(ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
     queryset = MainCourse.objects.all().order_by("-created_at")
     serializer_class = MainCourseSerializer
-    pagination_class = CustomPagination       # This limits to 100
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
         if self.request.method.lower() != "get":
             return self.queryset
-        data = self.request.query_params.dict()
+        data = querydict_to_dict(self.request.query_params)
         data.pop("page", None)
-        keyword = data.pop("keyword", None)
-        results = self.queryset#.filter(**data)
+        searchField = data.pop("searchField", None)
+        searchFieldArray = data.pop("searchField[]", None)
+        value = data.pop("value", None)
+        valueArray = data.pop("value[]", None)
+        results = self.queryset
 
-        if keyword:
-            search_fields = ("")
-            query = get_query(keyword, search_fields)
-            results = results.filter(query)
+        if searchField:
+            if value:
+                query = get_query(value, [searchField])
+                results = results.filter(query)
+        if searchFieldArray:
+            if valueArray:
+                query = get_query(valueArray, searchFieldArray)
+                print(query, "MY QUERY")
+                results = results.filter(query)
         return results
     
     def create(self, request, *args, **kwargs):
@@ -246,21 +275,28 @@ class CourseView(ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
     queryset = Course.objects.all().order_by("specialty")
     serializer_class = CourseSerializer
-    pagination_class = CustomPagination       # This limits to 100
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
         if self.request.method.lower() != "get":
             return self.queryset
-        data = self.request.query_params.dict()
+        data = querydict_to_dict(self.request.query_params)
         data.pop("page", None)
-        keyword = data.pop("keyword", None)
-        results = self.queryset#.filter(**data)
+        searchField = data.pop("searchField", None)
+        searchFieldArray = data.pop("searchField[]", None)
+        value = data.pop("value", None)
+        valueArray = data.pop("value[]", None)
+        results = self.queryset
 
-        if keyword:
-            search_fields = ("")
-            query = get_query(keyword, search_fields)
-            results = results.filter(query)
+        if searchField:
+            if value:
+                query = get_query(value, [searchField])
+                results = results.filter(query)
+        if searchFieldArray:
+            if valueArray:
+                query = get_query(valueArray, searchFieldArray)
+                print(query, "MY QUERY")
+                results = results.filter(query)
         return results
     
     def create(self, request, *args, **kwargs):
@@ -304,21 +340,38 @@ class ResultView(ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
     queryset = Result.objects.all().order_by("-created_at")
     serializer_class = ResultSerializer
-    pagination_class = CustomPagination       # This limits to 100
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
         if self.request.method.lower() != "get":
             return self.queryset
-        data = self.request.query_params.dict()
-        data.pop("page", None)
-        keyword = data.pop("keyword", None)
-        results = self.queryset#.filter(**data)
+        data = querydict_to_dict(self.request.query_params)
+        searchField = data.pop("searchField", None)
+        searchFieldArray = data.pop("searchField[]", None)
+        value = data.pop("value", None)
+        valueArray = data.pop("value[]", None)
+        try:
+            if (searchFieldArray[0] == "page"):
+                page = valueArray[0]
+        except:
+            page = data.pop("page", None)
 
-        if keyword:
-            search_fields = ("")
-            query = get_query(keyword, search_fields)
-            results = results.filter(query)
+        results = self.queryset
+
+        if searchField:
+            try:
+                if value:
+                    query = get_query(value, [searchField])
+                    results = results.filter(query)
+            except:
+                pass
+        if searchFieldArray:
+            try:
+                if valueArray:
+                    query = get_query(valueArray, searchFieldArray)
+                    results = results.filter(query)
+            except:
+                pass
         return results
     
     def create(self, request, *args, **kwargs):
@@ -362,7 +415,6 @@ class LevelView(ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
     queryset = Level.objects.all().order_by("-created_at")
     serializer_class = LevelSerializer
-    pagination_class = CustomPagination       # This limits to 100
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
@@ -377,7 +429,7 @@ class LevelView(ModelViewSet):
             search_fields = ("")
             query = get_query(keyword, search_fields)
             results = results.filter(query)
-        return results
+        return list(results)
     
     def create(self, request, *args, **kwargs):
         data = request.data["payload"]
@@ -416,3 +468,15 @@ class LevelView(ModelViewSet):
             return Response({"errors": "Error" })  
         
 
+class ResultAcademicYearView(ViewSet):
+
+    def list(self, request):
+        if self.request.method.lower() != "get":
+            return self.queryset
+        results = Result.objects.all().values("course__specialty__academic_year").values_list("course__specialty__academic_year", flat=True).distinct()
+        # results = self.queryset.values("course__specialty__academic_year")
+        # results = self.queryset.values("course")
+        acad = list(results)
+        print("========>", acad)
+
+        return Response({ "results": acad})

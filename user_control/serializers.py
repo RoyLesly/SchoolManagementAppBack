@@ -33,7 +33,6 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(serializers.Serializer):
     username = serializers.CharField(required=True, write_only=True)
-    email = serializers.EmailField(required=True, write_only=True)
     role = serializers.ChoiceField(ROLE_CHOICES)
 
 
@@ -68,7 +67,6 @@ class LoginSerialiser(serializers.Serializer):
 
 class CheckUserSerialiser(serializers.Serializer):
     username = serializers.CharField(required=True)
-    password = serializers.CharField(required=False)
 
 
 class LogoutSerialiser(serializers.Serializer):

@@ -1,26 +1,29 @@
 from rest_framework.viewsets import ModelViewSet
 from django.contrib.auth.models import Group, Permission
+from django.db.models import Q
 from .models import check_permission, UserProfile, PasswordToken, Appearance
-from app_control.serializers import UserProfileSerializer, UserProfileLecturerSerializer, UserProfileStudentSerializer
+from app_control.serializers import UserProfileSerializer
 from .serializers import (
     UserCreateSerializer, UserUpdateSerializer, CustomUser, CustomUserSerializer, LogoutSerialiser,
     LoginSerialiser, UpdatePasswordUserSerializer, ResetPasswordUserSerializer, UserActivities, 
     ForgotPasswordSerializer, UserActivitiesSerializer, GetUserSerializer, CreatePasswordUserSerializer,
     GroupSerializer, PermissionSerializer, AssignGroupsToUserSerializer, AppearanceSerializer,
-    AssignPermissionsToGroupSerializer,
+    AssignPermissionsToGroupSerializer, CheckUserSerialiser
 )
+import json
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from datetime import datetime
-from back.utils import create_access_token, create_refresh_token, get_query, CustomPagination
+from back.utils import create_access_token, create_refresh_token, get_query, querydict_to_dict
 from back.custom_methods import IsAuthenticatedCustom
 from django.utils import timezone
 from datetime import timedelta
 from user_control.functions import send_token_to_email
 import random
 from rest_framework.authentication import get_authorization_header
+from django.shortcuts import redirect
 
 
 def add_user_activity(user, action):
@@ -38,7 +41,6 @@ class GroupView(ModelViewSet):
     http_method_names = [ "post", "get", "put"]
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    pagination_class = CustomPagination       # This limits to 100
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
@@ -103,7 +105,6 @@ class PermissionView(ModelViewSet):
     http_method_names = [ "post", "get", "put"]
     queryset = Permission.objects.all()
     serializer_class = PermissionSerializer
-    pagination_class = CustomPagination       # This limits to 100
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
@@ -167,21 +168,41 @@ class UserCRUDView(ModelViewSet):
     serializer_class_create = UserCreateSerializer
     serializer_class_read = GetUserSerializer
     serializer_class_update = UserUpdateSerializer
-    pagination_class = CustomPagination       # This limits to 100
     # permission_classes = [ IsAuthenticatedCustom ]
 
     def get_queryset(self):
         if self.request.method.lower() != "get":
             return self.queryset
-        data = self.request.query_params.dict()
+        data = querydict_to_dict(self.request.query_params)
         data.pop("page", None)
-        keyword = data.pop("keyword", None)
-        results = self.queryset#.filter(**data)
+        kpi = data.pop("kpi", None)
+        searchField = data.pop("searchField", None)
+        searchFieldArray = data.pop("searchField[]", None)
+        value = data.pop("value", None)
+        valueArray = data.pop("value[]", None)
+        results = self.queryset
 
-        if keyword:
-            search_fields = ("")
-            query = get_query(keyword, search_fields)
-            results = results.filter(query)
+        if searchField:
+            try:
+                if value:
+                    query = get_query(value, [searchField])
+                    results = results.filter(query)
+            except:
+                pass
+        if searchFieldArray:
+            try:
+                if valueArray:
+                    query = get_query(valueArray, searchFieldArray)
+                    results = results.filter(query)
+            except:
+                pass
+        if kpi:
+            p = Q(**{"%s" % searchField: value})
+            try:
+                results = results.filter(p)
+            except:
+                pass
+        
         return results
     
     def create(self, request):
@@ -193,15 +214,18 @@ class UserCRUDView(ModelViewSet):
             if valid_request.is_valid():
                 if CustomUser.objects.filter(username=request.data["payload"]["username"]):
                     return Response( {"errors": "UserName Exist Already"} )
+                if CustomUser.objects.filter(email=request.data["payload"]["email"]):
+                    return Response( {"errors": "Email Exist Already"} )
             else:
-                return Response( {"errors": valid_request.errors} )
+                return Response( {"errors": valid_request.errors()} )
         except:
             return Response( {"errors": valid_request.errors} )
+        CustomUser.objects.create(**valid_request.validated_data)
         
         try:
             CustomUser.objects.create(**valid_request.validated_data)
         except:
-            return Response( {"errors": "Server Error"} )
+            return Response( {"errors": "Server Error 2"} )
 
         add_user_activity(request.user, "added new user")
 
@@ -238,7 +262,7 @@ class UserCRUDView(ModelViewSet):
             return Response({"success": "Deleted" })            
         except:
             return Response({"errors": "User May Contain Profile " }) 
-    
+
 
 class LoginView(ModelViewSet):
     http_method_names = ["post"]
@@ -267,21 +291,40 @@ class LoginView(ModelViewSet):
         response = Response()
         response.set_cookie(key="refresh", value=refresh, httponly=True)
         response.data = {
-            "success" : {
-                "refresh": refresh, 
-                "user": {
+            "success" : {          
+                "authUser": {
                     "id": user.id, 
-                    "token": access, 
                     "username": user.username, 
                     "role": user.role, 
                     "is_active": user.is_active,
-                    "last_login": user.last_login
-                }
+                    "token": access, 
+                    "refresh": refresh, 
+                },
+                "user": valid_request.data
             }
         }
         add_user_activity(user, "logged in")
         return response
     
+
+class CheckUserView(ModelViewSet):
+    http_method_names = ["post"]
+    queryset = CustomUser.objects.all()
+    serializer_class = CheckUserSerialiser
+
+    def create(self, request):
+        valid_request = self.serializer_class(data=request.data["payload"])
+        if not valid_request.is_valid():
+            return Response({"errors": valid_request.errors })
+        try:
+            user = CustomUser.objects.get(username=request.data["payload"]["username"])
+            if user.password:
+                return Response({"success": "User Exist Goto Login" })
+            else:
+                return Response({"success": { "user_id": user.id} })
+        except:
+            return Response({"errors": "User Not Found !!!" })
+
 
 class LogoutView(ModelViewSet):
     http_method_names = ["post"]
@@ -320,7 +363,7 @@ class PasswordView(ModelViewSet):
             user = CustomUser.objects.filter(
                 id=valid_request.validated_data["user_id"])
             if not user:
-                raise Exception("User with Id not Found")
+                return Response({"error": "User with Id not Found"})
             username = user[0].username
             user2 = authenticate(
                 username=username,
@@ -332,7 +375,7 @@ class PasswordView(ModelViewSet):
                 add_user_activity(user[0], "updated password")
                 return Response({"success": "User Password Updated"})
             if not user2:
-                return Response({"error": "Operation Error"})
+                return Response({"error": "Wrong / No Password for User"})
             
 
         # CREATING PASSWORD
@@ -357,25 +400,24 @@ class PasswordView(ModelViewSet):
         if (request.data["payload"]["action"] == "resetting_password"):
             valid_request = self.serializer_class_reset(data=request.data["payload"])
             if (request.data["payload"]["updated_by_id"] < 1):
-                return Response({ "errors": "Not Logged In" })
+                return Response({ "error": "Not Logged In" })
             if not valid_request.is_valid():
-                return Response({ "errors": valid_request.errors })
+                return Response({ "error": valid_request.errors })
             try:
                 account = CustomUser.objects.get(id=valid_request.validated_data["account_to_reset_id"])
             except:
-                return Response({"errors": "Not Valid Account"})
+                return Response({"error": "Not Valid Account"})
             user = CustomUser.objects.get(id=request.data["payload"]["updated_by_id"])
-            
             try:
                 if account.is_superuser:
                     if not user.is_superuser:
-                        return Response({"errors": "Contact Admin"})
-                    account.set_password(valid_request.validated_data["password"])
-                    account.save()
-                    add_user_activity(user, "reset password for " + account.username)
-                    return Response({"success": "Reset Password - " + account.username})
+                        return Response({"error": "Contact Admin"})
+                account.set_password(valid_request.validated_data["password"])
+                account.save()
+                add_user_activity(user, "reset password for " + account.username)
+                return Response({"success": "Reset Password - " + account.username})
             except:
-                return Response({"errors": "Operation Failed"})
+                return Response({"error": "Operation Failed"})
            
 
 class PasswordForgotView(ModelViewSet):
@@ -404,26 +446,19 @@ class PasswordForgotView(ModelViewSet):
             profile = all_profile[0]
             
         if (request.data["payload"]["auth_method"] == "email"):
-            all_profile = UserProfile.objects.filter( email=valid_request.validated_data["data"] )
+            all_profile = CustomUser.objects.filter( email=valid_request.validated_data["data"] )
             if not all_profile:
                 return Response({"error": "No Account Found !!!"})
-            profile = all_profile[0]
+            user = all_profile[0]
         t = random.randint(100000, 999999)
 
-        if not profile:
+        if not user:
             return Response({"error": "No Account Found !!!"})
-        all_tokens = PasswordToken.objects.filter(user_profile=profile).order_by("-created_at")
+        all_tokens = PasswordToken.objects.filter(user=user).order_by("-created_at")
         if not all_tokens:
-            # token = PasswordToken.objects.create(
-            #     user_profile=profile,
-            #     token=t,
-            #     expired=False,
-            #     sent_mail=False
-            # )
-            # token.save()
             try:
                 token = PasswordToken.objects.create(
-                    user_profile=profile,
+                    user=user,
                     token=t,
                     expired=False,
                     sent_mail=False
@@ -477,34 +512,78 @@ class UserActivitiesView(ModelViewSet):
     http_method_names = ["get"]
     queryset = UserActivities.objects.all()
     permission_classes = (IsAuthenticatedCustom, )
-    pagination_class = CustomPagination
 
     class Meta:
         ordering = ("-created_at", )         
     
 
-class UserProfilesView(ModelViewSet):
-    http_method_names = ["get", "post", "put", "delete"]
-    queryset = UserProfile.objects.all().order_by("-created_at")
+class UserProfilesStudentsView(ModelViewSet):
+    http_method_names = ["get",]
+    queryset = UserProfile.objects.select_related().all().order_by("-id").filter(user__role="student")
     serializer_class = UserProfileSerializer
-    serializer_class_lecturer = UserProfileLecturerSerializer
-    serializer_class_student = UserProfileStudentSerializer
-    pagination_class = CustomPagination       # This limits to 100
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
         if self.request.method.lower() != "get":
             return self.queryset
-        data = self.request.query_params.dict()
-        data.pop("page", None)
-        keyword = data.pop("keyword", None)
-        results = self.queryset#.filter(**data)
-
-        if keyword:
-            search_fields = ("")
-            query = get_query(keyword, search_fields)
-            results = results.filter(query)
+        results = self.queryset
         return results 
+    
+
+class UserProfilesLecturersView(ModelViewSet):
+    http_method_names = ["get", "post", "put", "delete"]
+    queryset = UserProfile.objects.select_related().all().order_by("-created_at").filter(user__role="teacher")
+    serializer_class = UserProfileSerializer
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    def get_queryset(self):
+        if self.request.method.lower() != "get":
+            return self.queryset
+        results = self.queryset
+        return results 
+
+
+class UserProfilesView(ModelViewSet):
+    http_method_names = ["get", "post", "put", "delete"]
+    queryset = UserProfile.objects.select_related().all().order_by("-id")
+    # queryset = UserProfile.objects.exclude(specialty=None)
+    serializer_class = UserProfileSerializer
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    def get_queryset(self):
+        if self.request.method.lower() != "get":
+            return self.queryset
+        data = querydict_to_dict(self.request.query_params)
+        kpi = data.pop("kpi", None)
+        searchField = data.pop("searchField", None)
+        searchFieldArray = data.pop("searchField[]", None)
+        value = data.pop("value", None)
+        valueArray = data.pop("value[]", None)
+
+        results = self.queryset
+
+        if searchField:
+            try:
+                if value:
+                    query = get_query(value, [searchField])
+                    results = results.filter(query)
+            except:
+                pass
+        if searchFieldArray:
+            try:
+                if valueArray:
+                    query = get_query(valueArray, searchFieldArray)
+                    results = results.filter(query)
+            except:
+                pass
+        if kpi:
+            p = Q(**{"%s" % searchField: value})
+            try:
+                results = results.filter(p)
+            except:
+                pass
+        return results
+    
 
     def create(self, request, *args, **kwargs):
         data = request.data["payload"]
@@ -513,14 +592,13 @@ class UserProfilesView(ModelViewSet):
         perm_check = "user_control.add_userprofile"
         check_permission(request.data["payload"]["created_by_id"], perm_check)
         if (request.data["payload"]["role"] == "teacher"):
-            serializer = self.serializer_class_lecturer(data=data)
+            serializer = self.serializer_class(data=data)
         if (request.data["payload"]["role"] == "student"):
-            serializer = self.serializer_class_student(data=data)
+            serializer = self.serializer_class(data=data)
         else:
             serializer = self.serializer_class(data=data, instance=object)
         if serializer.is_valid():
             serializer.save()
-            print(serializer.data )
             return Response({"success": serializer.data })  
         raise Exception(serializer.errors)        
     
@@ -528,41 +606,12 @@ class UserProfilesView(ModelViewSet):
         perm_check = "user_control.change_userprofile"      
         check_permission(request.data["payload"]["updated_by_id"], perm_check)
         data = request.data["payload"]
-        batch_update = data["multiple"]
         prof = self.get_object()
-        if not batch_update:
-            if (request.data["payload"]["role"] == "teacher"):
-                serializer = self.serializer_class_lecturer(data=data, instance=prof)
-            if (request.data["payload"]["role"] == "student"):
-                serializer = self.serializer_class_student(data=data, instance=prof)
-            else:
-                serializer = self.serializer_class(data=data, instance=prof)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({"success": serializer.data}) 
-            return Response({"errors": serializer.errors}) 
-        else:
-            if (request.data["payload"]["role"] == "student"):
-                print("updating multiple_student")
-                all_profiles_with_user_id = UserProfile.objects.filter(user_id=prof.user.id)
-                print("updating multiple_student 2")
-                for p in all_profiles_with_user_id:
-                    print("updating multiple_student 4")
-                    serializer = self.serializer_class_student(data=data, instance=p)
-                    if serializer.is_valid():
-                        serializer.save()
-                    else:
-                        return Response({"errors": serializer.errors}) 
-            else:
-                print("updating multiple_teacher")
-                all_profiles_with_user_id = UserProfile.objects.filter(user_id=prof.user.id)
-                for p in all_profiles_with_user_id:
-                    serializer = self.serializer_class(data=data, instance=p)
-                    if serializer.is_valid():
-                        serializer.save()
-                    else:
-                        return Response({"errors": serializer.errors}) 
+        serializer = self.serializer_class(data=data, instance=prof)
+        if serializer.is_valid():
+            serializer.save()
             return Response({"success": serializer.data}) 
+        return Response({"errors": serializer.errors}) 
         
     
     def destroy(self, request, *args, **kwargs):
@@ -582,7 +631,6 @@ class AppearanceView(ModelViewSet):
     http_method_names = ["get", "put", "delete"]
     queryset = Appearance.objects.all().order_by("-created_at")
     serializer_class = AppearanceSerializer
-    pagination_class = CustomPagination       # This limits to 100
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
@@ -642,6 +690,7 @@ class AssignGroupsToUserView(ModelViewSet):
     
 
 class AssignPermissionsGroupView(ModelViewSet):
+
     http_method_names = ["put"]
     queryset = Group.objects.all()
     serializer_class = AssignPermissionsToGroupSerializer
@@ -657,3 +706,11 @@ class AssignPermissionsGroupView(ModelViewSet):
             return Response({"success": serializer.data}) 
         raise Exception(serializer.errors)
         return Response({"errors": serializer.errors }) 
+    
+    
+def verify_email(request, pk):
+    user = CustomUser.objects.get(pk=pk)
+    if not user.email_confirmed:
+        user.email_confirmed = True
+        user.save()
+        return redirect("https://result.st-joan.com")

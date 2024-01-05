@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import ( AbstractBaseUser, PermissionsMixin, BaseUserManager )
 from django.db.models.signals import post_save
-from user_control.functions import create_profile, create_appearance, send_email_update, create_result_from_profile
+from user_control.functions import generate_matricle, create_profile, create_appearance, send_email_update, create_result_from_profile
 from user_control.choices import DARK_MODE_CHOICES, DEPT_CHOICES, ROLE_CHOICES, TITLE_CHOICES, LANG_CHOICES
 from datetime import datetime
 from rest_framework.response import Response
@@ -17,7 +17,6 @@ def getCustomUserPerms(id):
 
 def check_permission(user_id, perm_check):
     if not CustomUser.objects.filter(id=user_id).first():
-        print("NOT")
         raise Exception({ "errors": "NOT LOGGED IN" })
     perms = getCustomUserPerms(user_id)
     x = perm_check in perms
@@ -52,12 +51,12 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     username = models.CharField(max_length=15, unique=True)
-    matricle = models.CharField(max_length=15, unique=False, blank=True, default=random.randint(11111, 99999))
+    matricle = models.CharField(max_length=15, unique=True, blank=True)
     role = models.CharField(max_length=15, choices=ROLE_CHOICES, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    email = models.EmailField(null=False, unique=True, blank=False)
+    email = models.EmailField(null=True, unique=True, blank=True)
     hod = models.BooleanField(default=False, blank=True)
     email_confirmed = models.BooleanField(default=False, blank=True)
     first_name = models.CharField(max_length=50, unique=False, null=True, blank=True)
@@ -65,7 +64,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     about = models.TextField(max_length=500, blank=True, null=True)
     address = models.CharField(max_length=50, blank=True, null=True)
     sex = models.CharField(max_length=6, blank=True, null=True)
-    telephone = models.CharField(default=0, max_length=50, blank=True)
+    telephone = models.CharField(default=0, max_length=15, blank=True)
     title = models.CharField(max_length=15, choices=TITLE_CHOICES, blank=True, null=True)
     pob = models.CharField(max_length=25, null=True, blank=True)
     dob = models.DateField(null=True, blank=True)
@@ -86,8 +85,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ordering = ("created_at",)
     
 
-post_save.connect(create_profile, sender=CustomUser)
+post_save.connect(generate_matricle, sender=CustomUser)
 post_save.connect(create_appearance, sender=CustomUser)
+post_save.connect(create_profile, sender=CustomUser)
 
 
 class UserProfile(models.Model):
@@ -137,7 +137,7 @@ class UserActivities(models.Model):
 
 
 class PasswordToken(models.Model):
-    user_profile = models.OneToOneField( UserProfile, related_name="passwordtoken_userprofile", null=False, on_delete=models.CASCADE )
+    user = models.OneToOneField( CustomUser, related_name="passwordtoken_user", null=False, on_delete=models.CASCADE )
     token = models.CharField(max_length=6, unique=True)
     expired = models.BooleanField(null=False)
     sent_mail = models.BooleanField(null=False)
@@ -148,5 +148,5 @@ class PasswordToken(models.Model):
         ordering = ("-created_at",)
 
     def __str__(self):
-        return f"{self.user_profile.id} {self.token} on {self.updated_at}"
+        return f"{self.user.id} {self.token} on {self.updated_at}"
 

@@ -14,8 +14,8 @@ class MainCourseAdmin(admin.ModelAdmin):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ("id", "specialty", "course_code", "course_credit",  "semester", "course_type",
-                    "completed", "assigned_to", "assigned", "created_at", "updated_at")
+    list_display = ("id", "specialty", "course_code", "course_credit",  "semester", "course_type", "hours", "date_assigned",
+                    "completed", "paid", "assigned_to", "assigned", "created_at", "updated_at")
     search_fields = ("", "id",)
 
 @admin.register(MainSpecialty)
