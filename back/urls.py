@@ -2,29 +2,25 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
-# from drf_yasg.views import get_schema_view
-# from drf_yasg import openapi
-from rest_framework import permissions
+from rest_framework_simplejwt.views import ( 
+    TokenRefreshView,
+)
+from higher_control.user_control.views import MyTokenObtainPairView
+from django.views.decorators.csrf import csrf_exempt
 
-# from rest_framework_simplejwt import views as simple_jwt_views
-
-# schema_view = get_schema_view(
-#     openapi.Info(
-#         title="EMR API",
-#         default_version='v1.0.1',
-#         description="EMR DESCRIPTION",
-#         terms_of_service="https://www.google.com/policies/terms/",
-#         contact=openapi.Contact(email="nleslynsom@gmail.com"),
-#         license=openapi.License(name="BSD License"),
-#     ),
-#     public=True,
-#     permission_classes=[permissions.AllowAny],
-# )
 
 urlpatterns = [
-    # path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    # path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('token/', csrf_exempt(MyTokenObtainPairView.as_view()), name="token"),
+    path('token/refresh/', TokenRefreshView.as_view(), name="token_refresh"),
+
     path('admin/', admin.site.urls),
-    path('app/', include('app_control.urls')),
-    path('user/', include('user_control.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('tenant/', include('tenant.urls')),
+    path('higher/', include('higher_control.urls')),
+    path('secondary/', include('secondary_control.urls')),
+    path('primary/', include('primary_control.urls')),
+    path('password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path('password_reset/confirm/', include('django_rest_passwordreset.urls', namespace='password_confirm')),
+
+] \
+    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)\
+    + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

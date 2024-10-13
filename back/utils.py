@@ -1,7 +1,7 @@
 import jwt
 from datetime import datetime, timedelta
 from django.conf import settings
-from user_control.models import CustomUser
+from higher_control.user_control.models import CustomUser
 from rest_framework.pagination import PageNumberPagination
 import re
 from django.db.models import Q
@@ -69,10 +69,17 @@ def verify_token(bearer):
 
 
 class CustomPagination(PageNumberPagination):
-    page_size = 100
-    page_size_query_param = "page_size"
-    max_page_size = 100
+    page_size = 50
+    max_page_size = 50
+    page_size_query_param = "size"
+    page_query_param = "page"
 
+
+class ResultPagination(PageNumberPagination):
+    page_size = 10000
+    max_page_size = 10000
+    page_size_query_param = "size"
+    page_query_param = "page"
 
 def normalize_query(
         query_string,
@@ -126,6 +133,51 @@ def get_query(query_string, search_fields):
         return query
 
     
+def get_query_exact(query_string, search_fields):
+    def convertBooleanNone(item):
+        if (item == "true"):
+            return 1
+        elif (item == "false"):
+            return 0
+        elif (item == "None"):
+            return None
+        else:
+            return item
+    query = None
+
+    try:
+        terms = normalize_query(query_string)
+        for t in terms:
+            term = convertBooleanNone(t)
+            or_query = None     # Query to search for a given term in each field
+            for field_name in search_fields:
+                q = Q(**{"%s__exact" % field_name: term})
+                if or_query is None:
+                    or_query = q
+                else:
+                    or_query = or_query | q
+            if query is None:
+                query = or_query
+            else:
+                query = query & or_query
+            return query
+    except:
+        i = 0
+        for t in query_string:
+            term = convertBooleanNone(t)
+            or_query = None     # Query to search for a given term in each field
+            q = Q(**{"%__exact" % search_fields[i]: term})
+            if or_query is None:
+                or_query = q
+            else:
+                or_query = or_query | q
+            if query is None:
+                query = or_query
+            else:
+                query = query & or_query
+            i += 1
+        return query
+
     
 def querydict_to_dict(query_dict):
     data = {}
