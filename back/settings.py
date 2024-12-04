@@ -1,26 +1,36 @@
-from pathlib import Path
 import os
+from pathlib import Path
 from django.conf import settings
 from datetime import timedelta
 from import_export.formats.base_formats import CSV, XLSX
+from dotenv import load_dotenv
+from corsheaders.defaults import default_headers
+
+load_dotenv()  # Load environment variables from .env
 
 IMPORT_FORMATS = [CSV, XLSX]
 EXPORT_FORMATS = [CSV, XLSX]
 
-# load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 CORS_ALLOW_ALL_ORIGINS = True
-SECRET_KEY = 'django-insecure-voq(is89b&38ntkz1xse#tbl8%er&+gn=3&1r$_5s_9jy2so)+'
-DEBUG = True
+CORS_ALLOW_HEADERS = list(default_headers) + [ 'media_type',]
+SECRET_KEY = os.getenv("SECRET_KEY", "default_key")
+DEBUG = os.getenv("DEBUG", True)
 
 ALLOWED_HOSTS = [ "*", "http://localhost", "brains.localhost", "test.localhost"]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "user_control.CustomUser"
+API_KEY = os.getenv("API_KEY", "default_key")
+USE_API_KEY = os.getenv("USE_API_KEY", True)
+
 
 REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "back.custom_methods.custom_exception_handler",
-    "DEFAULT_AUTHENTICATION_CLASSES": ('rest_framework_simplejwt.authentication.JWTAuthentication',),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework_api_key.permissions.HasAPIKey',
+    ],
 }
 
 SHARED_APPS = [
@@ -39,6 +49,7 @@ SHARED_APPS = [
     'django_filters',
     'rest_framework',
     'rest_framework_simplejwt',
+    # "rest_framework_api_key",
     'corsheaders',
     'django_rest_passwordreset',
     'import_export',
@@ -51,6 +62,7 @@ SHARED_APPS = [
     'higher_control.app_control.apps.AppControlConfig',
     'higher_control.fees_control.apps.FeesControlConfig',
     'higher_control.noti_control.apps.NotiControlConfig',
+    'higher_control.chat_control.apps.ChatControlConfig',
     #'higher_control.time_control.apps.TimeControlConfig',
     # FOR SECONDARY
     'secondary_control.sec_user_control.apps.SecUserControlConfig',
@@ -125,10 +137,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # "back.middleware.APIKeyMiddleware"
 ]
 
 TENANT_MODEL = "tenant.Tenant"
 TENANT_DOMAIN_MODEL = "tenant.Domain"
+# SHOW_PUBLIC_IF_NO_TENANT_FOUND = T rue
 
 ROOT_URLCONF = 'back.urls'
 TEMPLATES = [
@@ -155,7 +169,11 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [('back.econneq.com', 6379), ('back.econneq.com', 6379)],
+            # "hosts": [('back.econneq.com', 6379), ('back.econneq.com', 6379)],
+            "hosts": [
+                ('127.0.0.1', 6379), 
+                # ('back.econneq.com', 6379)
+            ],
         },
     },
 }
@@ -163,12 +181,20 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django_tenants.postgresql_backend',
-        'NAME': 'estudent', # 'estudents'
-        'USER': 'postgres',  # 'postgres',
-        'PASSWORD': 'Rjlink75',  # 'Admin',
-        'HOST': '127.0.0.1',  # '37.60.235.58',
-        'PORT': '5432'
+        'NAME': os.getenv("DBNAME", "postgres"),  # Default fallback
+        'USER': os.getenv("DBUSER", "postgres"),
+        'PASSWORD': os.getenv("DBPASSWORD", "password"),
+        'HOST': os.getenv("DBHOST", "127.0.0.1"),
+        'PORT': os.getenv("DBPORT", "5432"),
     }
+    # 'default': {
+    #     'ENGINE': 'django_tenants.postgresql_backend',
+    #     'NAME': 'estudent', # 'estudents'
+    #     'USER': 'postgres',  # 'postgres',
+    #     'PASSWORD': 'Rjlink75',  # 'Admin',
+    #     'HOST': '127.0.0.1',  # '37.60.235.58',
+    #     'PORT': '5432'
+    # }
 }
 
 DATABASE_ROUTERS = ('django_tenants.routers.TenantSyncRouter',)

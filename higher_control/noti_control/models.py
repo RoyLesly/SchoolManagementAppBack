@@ -6,10 +6,10 @@ from .choices import *
 
 
 class Notification(models.Model):
-    message_one = models.CharField(max_length=255, null=False, blank=False)
-    message_two = models.CharField(max_length=255, null=True, blank=True)
+    message = models.TextField(null=False, blank=False)
+    # message_two = models.CharField(max_length=255, null=True, blank=True)
     target = models.CharField(max_length=15, choices=TARGET_CHOICES, blank=True, null=True)
-    schools = models.ManyToManyField("app_control.SchoolInfo", blank=True)
+    schools = models.ManyToManyField("app_control.SchoolInfoHigher", blank=True)
     domains = models.ManyToManyField("app_control.Domain", blank=True)
     specialty = models.ManyToManyField("app_control.Specialty", blank=True)
     custom = models.CharField(max_length=50, choices=CUSTOM_NOTI_QUERY_CHOICES, blank=True, null=True)
@@ -34,8 +34,7 @@ post_save.connect(deactivate_notifications, sender=Notification)
 
 
 class Complain(models.Model):
-    message_one = models.CharField(max_length=255, null=False, blank=False)
-    message_two = models.CharField(max_length=255, null=True, blank=True)
+    message = models.TextField(null=False, blank=False)
     complain_type = models.CharField(max_length=15, choices=COMPLAIN_TYPE_CHOICES, blank=True, null=True)
 
     status = models.BooleanField(default=True, null=False, blank=False)

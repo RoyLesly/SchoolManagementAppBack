@@ -8,9 +8,11 @@ from .choices import *
 import math, pytz
 from django.db.models.signals import post_save, pre_save
 from datetime import datetime, date
+from django.utils.timezone import now
+
 
 # datetime object containing current date and time
-now = datetime.now(pytz.timezone('Africa/Douala'))
+# now = datetime.now(pytz.timezone('Africa/Douala'))
 today = date.today()
 
 
@@ -82,36 +84,23 @@ class TimeSlot(models.Model):
         constraints = [ 
             models.UniqueConstraint(fields=["start", "timetableday"], name="unique_timeslot")
         ]
-    def update_time(self):
+    
+    def save(self, *args, **kwargs):
+        self.title = self.course.main_course.course_name
         if self.action == "IN":
-            self.start_time = now.time()
-        if self.action == "OUT":
-            self.end_time = now.time
-            diff = datetime.combine(today, self.end_time) - datetime.combine(today, self.start_time)
-            # diff = datetime.combine(today, self.end_time) - datetime.combine(today, self.start_time)
-            self.duration = diff
-            time_slot_hours = math.ceil(((self.end - self.start).total_seconds()/3600) * 4) / 4
-            hours_taught = math.ceil((diff.total_seconds()/3600) * 4) / 4
-            if time_slot_hours < hours_taught:
-                self.hours = time_slot_hours
-            else:
-                self.hours = hours_taught
-        if self.action == "OUT-BY-SYSTEM":
-            self.end_time = now
+            self.status = "CHECKED-IN"  # Extract time from DateTime
+            self.start_time = now().time()
 
-def create_title(sender, created, instance, *args, **kwargs):
-    if created:
-        if instance.title:
-            pass
-        else: 
-            instance.title = instance.course.main_course.course_name
-            instance.save()
+        elif self.action == "OUT" and self.start:
+            self.end_time = now().time()  # Extract time from DateTime
+            self.status = "CHECKED-OUT"  # Extract time from DateTime
+            start_time = datetime.combine(datetime.today(), self.start_time)
+            end_time = datetime.combine(datetime.today(), self.end_time)
+            time_difference = end_time - start_time
+            self.duration = time_difference
+            self.hours = round((time_difference.total_seconds() / 3600) / 0.25) * 0.25  # Convert to hours
+        super().save(*args, **kwargs)
 
-def other_actions(sender, instance, *args, **kwargs):
-    instance.update_time()
-
-pre_save.connect(other_actions, sender=TimeSlot)
-post_save.connect(create_title, sender=TimeSlot)
 post_save.connect(update_course_hours_left, sender=TimeSlot)
 
 

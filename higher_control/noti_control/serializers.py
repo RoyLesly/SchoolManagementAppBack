@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from higher_control.noti_control.models import *
-from higher_control.app_control.serializers import SchoolInfo, Domain, Specialty, DomainSerializer, SpecialtySerializer
+from higher_control.app_control.serializers import SchoolInfoHigher, Domain, Specialty, DomainSerializer, SpecialtySerializer
 from higher_control.user_control.serializers import CustomUserSerializer
 from datetime import datetime
 import importlib
@@ -11,7 +11,7 @@ class IDListField(serializers.RelatedField):
     
     
 class NotificationSerializer(serializers.ModelSerializer):
-    schools = serializers.PrimaryKeyRelatedField(many=True, queryset=SchoolInfo.objects.all(), required=False)
+    schools = serializers.PrimaryKeyRelatedField(many=True, queryset=SchoolInfoHigher.objects.all(), required=False)
     domains = serializers.PrimaryKeyRelatedField(many=True, queryset=Domain.objects.all(), required=False)
     specialty = serializers.PrimaryKeyRelatedField(many=True, queryset=Specialty.objects.all(), required=False)
     created_by = CustomUserSerializer(read_only=True)

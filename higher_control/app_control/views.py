@@ -9,25 +9,46 @@ from .filters import *
 from django_filters import rest_framework as filters
 
 
-class DomainView(ModelViewSet):
-    http_method_names = [ "post", "put", "delete"]
-    queryset = Domain.objects.all().order_by("domain_name")
+class BaseModelViewSet(ModelViewSet):
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    pagination_class = CustomPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+
+    def get_queryset(self):
+        return self.queryset.order_by("-created_at")
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+
+class SchoolIdentificationHigherView(BaseModelViewSet):
+    http_method_names = ["post", "put", "delete"]
+    queryset = SchoolIdentificationHigher.objects.all()
+    serializer_class = SchoolIdentificationHigherSerializer
+    filterset_fields = ('id', 'school_name',)
+
+class SchoolInfoHigherView(BaseModelViewSet):
+    http_method_names = ["post", "put", "delete"]
+    queryset = SchoolInfoHigher.objects.all()
+    serializer_class = SchoolInfoHigherSerializer
+    filterset_fields = ('id', 'school_name',)
+
+class DomainView(BaseModelViewSet):
+    http_method_names = ["get", "post", "put", "delete"]
+    queryset = Domain.objects.all()
     serializer_class = DomainSerializer
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = CustomPagination
-    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DomainFilter
-    # permission_classes = [ IsAuthenticated ]
 
-
-class FieldView(ModelViewSet):
-    http_method_names = [ "post", "put", "delete"]
-    queryset = Field.objects.all().order_by("-created_at")
+class FieldView(BaseModelViewSet):
+    http_method_names = ["post", "put", "delete"]
+    queryset = Field.objects.all()
     serializer_class = FieldSerializer
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = CustomPagination
-    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = FieldFilter
+
+
 
 
 class MainSpecialtyView(ModelViewSet):
@@ -71,6 +92,36 @@ class CourseView(ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = CourseFilter
     # permission_classes = [ IsAuthenticated ]
+   
+class CourseUploadView(ModelViewSet):
+    http_method_names = [ "post", "put", "delete"]
+    queryset = CourseUpload.objects.all().order_by("-course")
+    serializer_class = CourseUploadSerializer
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    pagination_class = CustomPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+    # filterset_class = CourseUploadFilter
+    # permission_classes = [ IsAuthenticated ]
+   
+class CourseModuleView(ModelViewSet):
+    http_method_names = [ "post", "put", "delete"]
+    queryset = CourseModule.objects.all().order_by("-course")
+    serializer_class = CourseModuleSerializer
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    pagination_class = CustomPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = CourseModuleFilter
+    # permission_classes = [ IsAuthenticated ]
+   
+class CourseModuleDetailView(ModelViewSet):
+    http_method_names = [ "post", "put", "delete"]
+    queryset = CourseModuleDetail.objects.all().order_by("-created_at")
+    serializer_class = CourseModuleDetailSerializer
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    pagination_class = CustomPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = CourseModuleDetailFilter
+    # permission_classes = [ IsAuthenticated ]
         
 
 
@@ -105,36 +156,6 @@ class PublishView(ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PublishFilter
     # permission_classes = [ IsAuthenticated ]
-    
-        
-class CampusView(ModelViewSet):
-    http_method_names = [ "post", "put", "delete"]
-    queryset = Campus.objects.all().order_by("-created_at")
-    serializer_class = CampusSerializer
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = CustomPagination
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ('id', 'name', 'region',)
-    
-        
-class SchoolInfoView(ModelViewSet):
-    http_method_names = [ "post", "put", "delete"]
-    queryset = SchoolInfo.objects.all().order_by("-created_at")
-    serializer_class = SchoolInfoSerializer
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = CustomPagination
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ('id', 'school_name',)
-    
-        
-class SchoolIdentificationView(ModelViewSet):
-    http_method_names = [ "post", "put", "delete"]
-    queryset = SchoolIdentification.objects.all().order_by("-created_at")
-    serializer_class = SchoolIdentificationSerializer
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = CustomPagination
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ('id', 'school_name',)
     
         
 class SysCategoryView(ModelViewSet):

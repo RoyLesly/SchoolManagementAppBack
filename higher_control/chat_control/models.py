@@ -1,14 +1,18 @@
 from django.db import models
-
-
 from django.contrib.auth.models import User
 from django.db import models
 from higher_control.user_control.models import CustomUser
 
 
+class ChatUser(models.Model):
+    name = models.CharField(max_length=58)
+    telephone = models.IntegerField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class Room(models.Model):
     room_name = models.CharField(max_length=128)
-    online = models.ManyToManyField(CustomUser, blank=True)
+    online = models.ManyToManyField(ChatUser, blank=True)
 
     def get_online_count(self):
         return self.online.count()
@@ -26,9 +30,9 @@ class Room(models.Model):
 
 
 class Message(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="message_user")
-    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="sender")
-    reciever = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="reciever")
+    user = models.ForeignKey(ChatUser, null=True, on_delete=models.CASCADE, related_name="message_user")
+    sender = models.ForeignKey(ChatUser, null=True, on_delete=models.CASCADE, related_name="sender")
+    reciever = models.ForeignKey(ChatUser, null=True, on_delete=models.CASCADE, related_name="reciever")
     
     room = models.ForeignKey(Room, on_delete=models.PROTECT)
     content = models.CharField(max_length=1000)

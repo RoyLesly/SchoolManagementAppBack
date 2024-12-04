@@ -10,7 +10,7 @@ from django_filters import rest_framework as filters
 
 
 class TenantView(ModelViewSet):
-    http_method_names = [ "post", "put", "delete"]
+    http_method_names = [ "get", "post", "put", "delete"]
     queryset = Tenant.objects.all().order_by("id")
     serializer_class = TenantSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -21,7 +21,7 @@ class TenantView(ModelViewSet):
 
 
 class DomainView(ModelViewSet):
-    http_method_names = [ "post", "put", "delete"]
+    http_method_names = [ "get", "post", "put", "delete"]
     queryset = Domain.objects.all().order_by("id")
     serializer_class = DomainSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
@@ -29,3 +29,4 @@ class DomainView(ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DomainFilter
     # permission_classes = [ IsAuthenticated ]
+

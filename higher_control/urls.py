@@ -8,5 +8,5 @@ urlpatterns = [
     path('higher_fees_control/', include('higher_control.fees_control.urls')),
     path('higher_noti_control/', include('higher_control.noti_control.urls')),
     path('higher_time_control/', include('higher_control.time_control.urls')),
-    # path('higher_chat_control/', include('higher_control.chat_control.urls')),
+    path('higher_chat_control/', include('higher_control.chat_control.urls')),
 ]

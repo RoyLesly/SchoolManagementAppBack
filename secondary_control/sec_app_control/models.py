@@ -6,7 +6,8 @@ from datetime import date, datetime
 from django.utils import timezone
 from .functions import *
 from .choices import *
-from higher_control.app_control.models import SchoolInfo
+from higher_control.app_control.models import SchoolInfoHigher
+from tenant.models import Setting
 
 
 
@@ -29,7 +30,7 @@ class SecondaryLevel(models.Model):
     
 
 class SecondaryClassRoom(models.Model):
-    school = models.ForeignKey(SchoolInfo, null=False, related_name='secondary_classroom_school_info', on_delete=models.PROTECT)
+    school = models.ForeignKey(SchoolInfoHigher, null=False, related_name='secondary_classroom_school_info', on_delete=models.PROTECT)
     domain = models.CharField(max_length=15, choices=SECONDARY_DOMAIN_CHOICES, unique=False, null=False, blank=False)
     level = models.ForeignKey(SecondaryLevel, null=False, related_name='classroom_level', on_delete=models.PROTECT)
     academic_year = models.CharField(max_length=9, blank=False, unique=False)

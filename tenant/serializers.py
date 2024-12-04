@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import *
+# from .models import *
+from .models import Domain as Dom, Tenant
 from higher_control.user_control.serializers import CustomUserSerializer, GetCustomUserSerializer
 
 
@@ -21,7 +22,7 @@ class TenantSerializer(serializers.ModelSerializer):
 class DomainSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Domain
+        model = Dom
         fields = "__all__"
         dept = 1
 
@@ -53,3 +54,22 @@ class GetDomainSerializer(serializers.Serializer):
     tenant__description = serializers.CharField(read_only=True)
     tenant__is_active = serializers.IntegerField(read_only=True)
     is_primary = serializers.BooleanField(read_only=True)
+
+
+class SchoolIdentificationSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    logo = serializers.CharField(read_only=True)
+    code = serializers.CharField(read_only=True)
+    version = serializers.CharField(read_only=True)
+    director = serializers.CharField(read_only=True)
+    platform_charges = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    support_number_one = serializers.CharField(read_only=True)
+    support_number_two = serializers.CharField(read_only=True)
+    status = serializers.BooleanField(read_only=True)
+    back_end = serializers.CharField(read_only=True)
+    front_end = serializers.CharField(read_only=True)
+    created_by__full_name = serializers.CharField(read_only=True)
+    updated_by__full_name = serializers.CharField(read_only=True)
+
+

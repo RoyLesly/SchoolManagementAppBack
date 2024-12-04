@@ -88,7 +88,7 @@ def create_code_profile(sender, **kwargs):
             if instance_user_profile.specialty.school:
                 if instance_user_profile.specialty.school.school_identification:
                     if instance_user_profile.specialty.school.school_identification.front_end and instance_user_profile.id:
-                        qrcode_image = make(instance_user_profile.specialty.school.school_identification.front_end + "/pageMyResult/" + str(instance_user_profile.specialty.school.campus.id) + "/" + str(instance_user_profile.id))
+                        qrcode_image = make(instance_user_profile.specialty.school.school_identification.front_end + "/pageMyResult/" + str(instance_user_profile.specialty.school.id) + "/" + str(instance_user_profile.id))
                         canvas = Image.new("RGB", (400, 400), "white")
                         canvas.paste(qrcode_image)
                         fname = f'code-{instance_user_profile.user.username}' + '.png'
@@ -151,15 +151,17 @@ def profile_activate_deactivate_results(sender, **kwargs):
 
 
 def preinscription_post_save(sender, instance, created, *args, **kwargs):
-    if created and instance.action == "CREATING":
-        instance.generate_reg_number()
-        instance.save()
     if instance.action == "UPDATING":
         pass
-    if instance.action == "ADMISSION" and not instance.admission_status:
-        instance.admission_status = True
-        instance.status = "ADMITTED"
+    if created and (instance.action == "ADMISSION" or instance.action == "CREATING") and not instance.admission_status:
+        if instance.action == "ADMISSION":
+            instance.admission_status = True
+            instance.status == "ADMITTED"
+        else:
+            instance.status == "PENDING"
+        instance.generate_reg_number()
         instance.save()
+
 
 
 

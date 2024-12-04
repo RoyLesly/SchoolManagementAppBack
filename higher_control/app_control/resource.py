@@ -32,6 +32,21 @@ class CourseResource(resources.ModelResource):
         model = Course
 
 
+class CourseUploadResource(resources.ModelResource):
+    class Meta:
+        model = CourseUpload
+
+
+class CourseModuleResource(resources.ModelResource):
+    class Meta:
+        model = CourseModule
+
+
+class CourseModuleDetailResource(resources.ModelResource):
+    class Meta:
+        model = CourseModuleDetail
+
+
 class PublishResource(resources.ModelResource):
     class Meta:
         model = Publish
@@ -42,24 +57,20 @@ class LevelResource(resources.ModelResource):
         model = Level
 
 
-class CampusResource(resources.ModelResource):
-    class Meta:
-        model = Campus
-        
-
 class ResultResource(resources.ModelResource):
     class Meta:
         model = Result
 
 
-class SchoolInfoResource(resources.ModelResource):
+class SchoolInfoHigherResource(resources.ModelResource):
     class Meta:
-        model = SchoolInfo
+        model = SchoolInfoHigher
 
 
-class SchoolIdentificationResource(resources.ModelResource):
+class SchoolIdentificationHigherResource(resources.ModelResource):
     class Meta:
-        model = SchoolIdentification
+        model = SchoolIdentificationHigher
+        
 
 class SysCategoryResource(resources.ModelResource):
     class Meta:

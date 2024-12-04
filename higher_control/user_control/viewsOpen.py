@@ -1,6 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 from .models import *
 from back.utils import *
+from back.middleware import *
 from higher_control.user_control.serializers import *
 from .serializers import *
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -18,7 +19,7 @@ class CheckCustomUserView(ModelViewSet):
     pagination_class = CustomPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = CustomUserFilter
-    # permission_classes = [ IsAuthenticated ]
+    permission_classes = [ IsAuthenticatedWithAPIKey ]
 
     def get_queryset(self):
         param = querydict_to_dict(self.request.query_params)
@@ -49,6 +50,7 @@ class CheckPreInscriptionView(ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PreInscriptionFilter
     # permission_classes = [ IsAuthenticated ]
+    permission_classes = [ IsAuthenticatedWithAPIKey ]
 
     def get_queryset(self):
         param = querydict_to_dict(self.request.query_params)

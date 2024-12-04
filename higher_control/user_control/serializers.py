@@ -22,6 +22,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         user.save()
         token = super().get_token(user)
         token["username"] = user.username
+        token["full_name"] = user.full_name
+        token["matricle"] = user.matricle
         token["role"] = user.role
         token["is_superuser"] = user.is_superuser
         token["permissions"] = list(user.user_permissions.values_list("codename", flat=True))
@@ -85,26 +87,17 @@ class PageSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
 
 
-class CampusTwoSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = importlib.import_module("higher_control.app_control").models.Campus
-        fields = "__all__"
-
-
 class SchoolInfoTwoSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
-    campus = CampusTwoSerializer(read_only=True, required=False)
-    campus_id = serializers.CharField(required=True)
-    module_schoolinfo = importlib.import_module("higher_control.app_control").models.SchoolInfo
+    module_schoolinfo = importlib.import_module("higher_control.app_control").models.SchoolInfoHigher
 
     class Meta:
-        model = importlib.import_module("higher_control.app_control").models.SchoolInfo
+        model = importlib.import_module("higher_control.app_control").models.SchoolInfoHigher
         fields = "__all__"
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
-    schoolinfo = importlib.import_module("higher_control.app_control").models.SchoolInfo
+    schoolinfo = importlib.import_module("higher_control.app_control").models.SchoolInfoHigher
     school = serializers.PrimaryKeyRelatedField(many=True, queryset=schoolinfo.objects.all(), required=False)
     dept = DepartmentSerializer(many=True, read_only=True, required=False)
     page = PageSerializer(many=True, read_only=True, required=False)
@@ -116,7 +109,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # campus = validated_data.pop("created_campus")
         school = validated_data.pop("school")
-        print(school, 113)
         m = CustomUser.objects.create(**validated_data)
         for s in school:
             m.school.add(s)
@@ -243,6 +235,8 @@ class GetUserProfileSerializer(serializers.Serializer):
     user__address = serializers.CharField(read_only=True)
     user__telephone = serializers.CharField(read_only=True)
     user__email = serializers.CharField(read_only=True)
+    user__parent = serializers.CharField(read_only=True)
+    user__parent_name = serializers.CharField(read_only=True)
     specialty__id = serializers.IntegerField(read_only=True)
     specialty__main_specialty__specialty_name = serializers.CharField(read_only=True)
     specialty__main_specialty__field__domain__id = serializers.IntegerField(read_only=True)
@@ -254,7 +248,8 @@ class GetUserProfileSerializer(serializers.Serializer):
     specialty__school__campus__name = serializers.CharField(read_only=True)
     specialty__school__campus__region = serializers.CharField(read_only=True)
     specialty__school__school_name = serializers.CharField(read_only=True)
-    specialty__school__campus__id = serializers.CharField(read_only=True)
+    specialty__school__version = serializers.CharField(read_only=True)
+    specialty__school__campus__id = serializers.IntegerField(read_only=True)
     program__id = serializers.CharField(read_only=True)
     program__name = serializers.CharField(read_only=True)
     active = serializers.CharField(read_only=True)

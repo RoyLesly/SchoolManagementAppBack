@@ -116,6 +116,8 @@ class GetTimeSlotSerializer(serializers.Serializer):
     course__main_course__course_name = serializers.CharField(read_only=True)
     course__assigned_to__id = serializers.CharField(read_only=True)
     course__assigned_to__full_name = serializers.CharField(read_only=True)
+    course__hours = serializers.IntegerField(read_only=True)
+    course__hours_left = serializers.IntegerField(read_only=True)
 
     timetableday__id = serializers.IntegerField(read_only=True)
     timetableday__day = serializers.CharField(read_only=True)

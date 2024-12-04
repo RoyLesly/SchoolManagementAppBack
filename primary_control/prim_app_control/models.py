@@ -4,9 +4,8 @@ from higher_control.user_control.models import CustomUser
 from higher_control.user_control.choices import *
 from datetime import date, datetime
 from django.utils import timezone
-# from .functions import *
+from higher_control.app_control.models import SchoolInfoHigher
 from .choices import *
-from higher_control.app_control.models import SchoolInfo
 
 
 
@@ -28,7 +27,7 @@ class PrimaryLevel(models.Model):
     
 
 class PrimaryClassRoom(models.Model):
-    school = models.ForeignKey(SchoolInfo, null=False, related_name='Primary_classroom_school_info', on_delete=models.PROTECT)
+    school = models.ForeignKey(SchoolInfoHigher, null=False, related_name='Primary_classroom_school_info', on_delete=models.PROTECT)
     level = models.ForeignKey(PrimaryLevel, null=False, related_name='classroom_level', on_delete=models.PROTECT)
     academic_year = models.CharField(max_length=9, blank=False, unique=False)
     assigned_to = models.ForeignKey(CustomUser, null=True, blank=True, related_name='Primary_subject_lecturer', on_delete=models.SET_NULL)

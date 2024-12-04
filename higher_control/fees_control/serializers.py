@@ -93,7 +93,12 @@ class GetSchoolFeesSerializer(serializers.Serializer):
     userprofile__specialty__payment_three = serializers.IntegerField(read_only=True)
     userprofile__specialty__main_specialty__field__domain__id = serializers.IntegerField(read_only=True)
     userprofile__specialty__main_specialty__field__domain__domain_name = serializers.CharField(read_only=True)
-    platform_charges = serializers.IntegerField(read_only=True)
+    userprofile__specialty__school__campus__id = serializers.IntegerField(read_only=True)
+    userprofile__specialty__school__campus__name = serializers.CharField(read_only=True)
+    userprofile__specialty__school__version = serializers.CharField(read_only=True)
+    userprofile__specialty__school__school_type = serializers.CharField(read_only=True)
+    userprofile__specialty__school__school_identification__platform_charges = serializers.CharField(read_only=True)	
+    userprofile__specialty__school__school_identification__logo = serializers.ImageField()	
     platform_paid = serializers.BooleanField(read_only=True)
     balance = serializers.IntegerField(read_only=True)
 

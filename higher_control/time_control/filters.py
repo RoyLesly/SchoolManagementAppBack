@@ -15,6 +15,7 @@ class TimeTableWeekFilter(django_filters.FilterSet):
     specialty__main_specialty__field__field_name = django_filters.CharFilter(lookup_expr="icontains")
     specialty__main_specialty__field__domain__id = django_filters.NumberFilter(lookup_expr="exact")
     specialty__main_specialty__field__domain__domain_name = django_filters.CharFilter(lookup_expr="icontains")
+    specialty__school__id = django_filters.NumberFilter(lookup_expr="icontains")
     year_week = django_filters.CharFilter(lookup_expr="icontains")
     publish = django_filters.BooleanFilter(lookup_expr="icontains")
 

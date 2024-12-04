@@ -8,8 +8,33 @@ class CourseAdmin(ImportExportModelAdmin):
     resource_class = CourseResource
     list_display = ("id", "main_course", "specialty", "course_code", "course_credit",  "semester", "course_type", "hours", "hours_left", "date_assigned",
                     "completed", "paid", "assigned_to", "assigned", "created_at", "updated_at")
-    search_fields = ("main_course__course_name", "course_code", "semester",)
+    search_fields = ("id", "main_course__course_name", "specialty__school__campus__name", "assigned_to__first_name",)
+    list_filter = ("main_course__course_name", "specialty__academic_year", "specialty__level__level", "specialty__school__campus", "assigned_to__first_name",)
 admin.site.register(Course, CourseAdmin)
+
+
+class CourseModuleAdmin(ImportExportModelAdmin):
+    resource_class = CourseModuleResource
+    list_display = ("id", "module_title", "description", "content", "created_at")
+    search_fields = ("id", "module_title", "description", "content", "created_at")
+    list_filter = ("id", "module_title", "description", "content", "created_at")
+admin.site.register(CourseModule, CourseModuleAdmin)
+
+
+class CourseModuleDetailAdmin(ImportExportModelAdmin):
+    resource_class = CourseModuleDetailResource
+    list_display = ("id", "detail_title", "description", "content", "created_at")
+    search_fields = ("id", "detail_title", "description", "content", "created_at")
+    list_filter = ("id", "detail_title", "description", "content", "created_at")
+admin.site.register(CourseModuleDetail, CourseModuleDetailAdmin)
+
+
+class CourseUploadAdmin(ImportExportModelAdmin):
+    resource_class = CourseUploadResource
+    list_display = ("id", "title", "created_at")
+    search_fields = ("id", "title", "created_at")
+    list_filter = ("id", "title", "created_at",)
+admin.site.register(CourseUpload, CourseUploadAdmin)
 
 
 class PublishAdmin(ImportExportModelAdmin):
@@ -36,7 +61,8 @@ admin.site.register(Field, FieldAdmin)
 class MainSpecialtyAdmin(ImportExportModelAdmin):
     resource_class = MainSpecialtyResource
     list_display = ("id", "specialty_name", "specialty_name_short", "field", "created_at", "updated_at")
-    search_fields = ("specialty_name", "domain", "field")
+    search_fields = ("id", "specialty_name", "field__field_name", "field__domain__domain_name",)
+    list_filter = ("id", "specialty_name", "field__field_name", "field__domain__domain_name",)
 admin.site.register(MainSpecialty, MainSpecialtyAdmin)
 
 
@@ -44,6 +70,7 @@ class SpecialtyAdmin(ImportExportModelAdmin):
     resource_class = SpecialtyResource
     list_display = ("id", "main_specialty", "school", "academic_year", "level", "tuition", "registration", "payment_one", "payment_two", "created_at", "updated_at")
     search_fields = ("academic_year", "id", "main_specialty__specialty_name",)
+    list_filter = ("level__level", "academic_year", "main_specialty__specialty_name", "school__campus",)
 admin.site.register(Specialty, SpecialtyAdmin)
 
 
@@ -66,28 +93,22 @@ class ResultAdmin(ImportExportModelAdmin):
     list_display = ("id", "student", "course", "ca", "exam", "resit", "average", "validated", "active",
                     "publish_ca", "publish_exam", "publish_resit","closed", "created_at", "updated_at", "updated_by")
     search_fields = ("student__user__username", "student__user__matricle", "student__user__first_name", "course__main_course__course_name",)
+    list_filter = ("student__user__username", "student__user__matricle", "student__user__first_name", "course__main_course__course_name", "course__specialty__level__level", "course__specialty__school__campus",)
 admin.site.register(Result, ResultAdmin)
 
 
-class CampusAdmin(ImportExportModelAdmin):
-    resource_class = CampusResource
-    list_display = ("id", "name", "region", "created_by", "created_at")
-    search_fields = ("name", "region",)
-admin.site.register(Campus, CampusAdmin)
-
-
-class SchoolInfoAdmin(ImportExportModelAdmin):
-    resource_class = SchoolInfoResource
-    list_display = ("id", "school_name", "school_identification", "short_name", "niu", "town", "campus", "region", "email", "website", "address", "telephone_one", "created_at")
+class SchoolInfoHigherAdmin(ImportExportModelAdmin):
+    resource_class = SchoolInfoHigherResource
+    list_display = ("id", "school_name", "school_identification", "short_name", "niu", "town", "campus", "region", "email", "website", "address", "telephone", "created_at")
     search_fields = ("id", "school_name",)
-admin.site.register(SchoolInfo, SchoolInfoAdmin)
+admin.site.register(SchoolInfoHigher, SchoolInfoHigherAdmin)
 
 
-class SchoolIdentificationAdmin(ImportExportModelAdmin):
-    resource_class = SchoolIdentificationResource
+class SchoolIdentificationHigherAdmin(ImportExportModelAdmin):
+    resource_class = SchoolIdentificationHigherResource
     list_display = ("id", "code", "name", "status", "back_end", "created_by", "created_at")
     search_fields = ("id", "code", "name",)
-admin.site.register(SchoolIdentification, SchoolIdentificationAdmin)
+admin.site.register(SchoolIdentificationHigher, SchoolIdentificationHigherAdmin)
 
 
 class SysCategoryAdmin(ImportExportModelAdmin):

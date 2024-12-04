@@ -1,10 +1,11 @@
-from .models import Room
+from . models import *
 from django.shortcuts import render
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import *
+from . serializers import *
 from django.db.models import F, Q, OuterRef, Subquery, Value
 
 
@@ -67,6 +68,7 @@ class SendMessages(generics.CreateAPIView):
 
 
 class SearchUser(generics.ListAPIView):
+
     serializer_class = CustomUserSerializer
     queryset = CustomUser.objects.all()
     # permission_classes = [IsAuthenticated]
@@ -91,3 +93,23 @@ class SearchUser(generics.ListAPIView):
             )
         serializer = self.get_serializer(users, many=True)
         return Response(serializer.data)
+    
+
+
+
+class MessageListView(ListAPIView):
+    serializer_class = MessageSerializer
+
+    def get_queryset(self):
+        room_name = self.kwargs['room_name']
+        print(self.kwargs)
+        return Message.objects.filter(room__room_name=room_name)
+
+
+class RoomListView(ListAPIView):
+    serializer_class = RoomSerializer
+
+    def get_queryset(self):
+        room_name = self.kwargs['room_name']
+        print(self.kwargs)
+        return Room.objects.filter(room_name=room_name)

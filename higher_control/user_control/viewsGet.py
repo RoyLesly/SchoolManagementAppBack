@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import Group, Permission
 from .models import *
 from back.utils import *
+from back.middleware import *
 from higher_control.user_control.serializers import *
 from higher_control.app_control.serializers import UserProfileSerializer
 from .serializers import *
@@ -133,6 +134,8 @@ class GetCustomUserView(ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = CustomUserFilter
     # permission_classes = [ IsAuthenticated ]
+    permission_classes = [IsAuthenticatedWithAPIKey]  # Apply the custom permission
+
 
     def get_queryset(self):
         param = querydict_to_dict(self.request.query_params)

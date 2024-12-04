@@ -51,7 +51,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-
+    logo = models.ImageField(upload_to='user_images/', null=True, blank=True)
     username = models.CharField(max_length=19, unique=True)
     matricle = models.CharField(max_length=15, unique=True, blank=True)
     role = models.CharField(max_length=15, choices=ROLE_CHOICES, blank=False)
@@ -59,7 +59,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     
     dept = models.ManyToManyField("user_control.Department", blank=True)
     page = models.ManyToManyField("user_control.Page", blank=True)
-    school = models.ManyToManyField("app_control.SchoolInfo", blank=False, related_name='user_shool')
+    school = models.ManyToManyField("app_control.SchoolInfoHigher", blank=False, related_name='user_shool')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -79,7 +79,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     dob = models.DateField(null=True, blank=True)
     parent = models.CharField(max_length=30, null=True, blank=True)
     parent_telephone = models.CharField(unique=False, max_length=28, blank=True, null=True)
-    # created_campus = models.ManyToManyField("app_control.SchoolInfo", blank=False, related_name='user_created_campus')
 
     prefix = models.CharField(unique=False, max_length=28, blank=True, null=True)
     is_staff = models.BooleanField(default=False)
@@ -111,9 +110,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                 self.matricle = f"{pref[3:]}{str(pref)[1:3]}{str(self.id)[0:4].zfill(4)}"
             self.username = self.matricle
         else:
-            self.matricle = f"{str(self.first_name.strip().split()[0])}{str(self.id)[0:4].zfill(4)}"
-            self.username = f"{str(self.first_name.strip().split()[0])}{str(self.id)[0:4].zfill(4)}"
-        self.full_name = f"{self.first_name.strip()} {self.last_name}"
+            if self.first_name:
+                self.matricle = f"{str(self.first_name.strip().split()[0])}{str(self.id)[0:4].zfill(4)}"
+                self.username = f"{str(self.first_name.strip().split()[0])}{str(self.id)[0:4].zfill(4)}"
+        if self.full_name:
+            self.full_name = f"{self.first_name.strip()} {self.last_name}"
         
 
 def registration_post_save(sender, instance, created, *args, **kwargs):
@@ -139,7 +140,7 @@ class Department(models.Model):
         
         
 class Program(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True, blank=False, null=False)
     description = models.CharField(max_length=100)
     created_by = models.ForeignKey(CustomUser, null=True, related_name='program_created_by', on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -221,7 +222,7 @@ class PreInscription(models.Model):
     emergency_name = models.CharField(max_length=30, null=False, blank=False)
     emergency_town = models.CharField(max_length=30, null=True, blank=True)
     emergency_telephone = models.CharField(unique=False, max_length=28, blank=False, null=False)
-    program = models.CharField(max_length=12, choices=PROGRAM_CHOICES, blank=False, null=False)
+    program = models.CharField(max_length=50, blank=False, null=False)
     level = models.CharField(max_length=12, choices=LEVEL_CHOICES, blank=False, null=False)
     session = models.CharField(max_length=12, choices=SESSION_CHOICES, blank=False, null=False)
     academic_year = models.CharField(unique=False, max_length=10, blank=False, null=False)

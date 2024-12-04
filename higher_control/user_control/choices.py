@@ -37,7 +37,9 @@ LEVEL_CHOICES = (
 )
 
 PROGRAM_CHOICES = (
-    ("HND", "HND"), ("BTS", "BTS"), ("AQP", "AQP"), ("BSC", "BSC"), ("LICENSE", "LICENSE"), ("MASTERS", "MASTERS"), ("DPQ", "DPQ"), ("OND", "OND")
+    ("HND", "HND"), ("BTS", "BTS"), ("AQP", "AQP"), ("BSC", "BSC"), ("B-TECH", "B-TECH"), ("M-TECH", "M-TECH"), 
+    ("PHD", "PHD"), ("LICENSE", "LICENSE"), ("MASTERS", "MASTERS"), ("DPQ", "DPQ"), ("OND", "OND"), 
+    ("B-ENG", "B-ENG"), ("B-ENG", "B-ENG"), ("CISCO", "CISCO"),
 )
 
 PAGE_CHOICES = (

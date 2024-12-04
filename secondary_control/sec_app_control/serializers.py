@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import *
 from secondary_control.sec_user_control.models import SecondaryProfile
 from higher_control.user_control.serializers import CustomUser, CustomUserSerializer
-from higher_control.app_control.serializers import SchoolInfoSerializer
+from higher_control.app_control.serializers import SchoolInfoHigherSerializer
 
 
 class SecondaryLevelSerializer(serializers.ModelSerializer):
@@ -14,7 +14,7 @@ class SecondaryLevelSerializer(serializers.ModelSerializer):
 
 
 class SecondaryClassRoomSerializer(serializers.ModelSerializer):
-    school = SchoolInfoSerializer(read_only=True)
+    school = SchoolInfoHigherSerializer(read_only=True)
     school_id = serializers.CharField(write_only=True, required=True)
     level = SecondaryLevelSerializer(read_only=True)
     level_id = serializers.CharField(write_only=True, required=True)

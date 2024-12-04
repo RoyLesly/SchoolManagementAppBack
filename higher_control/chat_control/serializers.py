@@ -1,8 +1,14 @@
 from rest_framework import serializers
 from . models import *
-from user_control.serializers import CustomUserSerializer, GetCustomUserSerializer
+from higher_control.user_control.serializers import CustomUserSerializer, GetCustomUserSerializer
 
 import importlib
+
+class ChatUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatUser
+        fields = "__all__"
+        dept = 1
 
 
 class RoomSerializer(serializers.ModelSerializer):
@@ -14,11 +20,11 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    user = CustomUserSerializer(read_only=True)
+    user = ChatUserSerializer(read_only=True)
     user_id = serializers.CharField(write_only=True, required=False)
-    sender = CustomUserSerializer(read_only=True)
+    sender = ChatUserSerializer(read_only=True)
     sender_id = serializers.CharField(write_only=True, required=False)
-    reciever = CustomUserSerializer(read_only=True)
+    reciever = ChatUserSerializer(read_only=True)
     reciever_id = serializers.CharField(write_only=True, required=False)
 
     class Meta:

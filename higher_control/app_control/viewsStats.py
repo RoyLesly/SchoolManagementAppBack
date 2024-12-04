@@ -156,7 +156,7 @@ class GetStatsUserCardCountView(ViewSet):
         admins = CustomUser.objects.filter(role="admin", is_active=True, is_staff=False, school__id=searchSchool)
         lecturers = CustomUser.objects.filter(role="teacher", is_active=True, is_staff=False, school__id=searchSchool)
         students = UserProfile.objects.filter(specialty__school__id=searchSchool, specialty__academic_year=statsYear, user__role="student", user__is_active=True, user__is_staff=False)
-        inactive = UserProfile.objects.filter(user__is_active=False, user__is_staff=False)
+        inactive = CustomUser.objects.filter(is_active=False, is_staff=False)
         res = []
 
         if statsYear:
@@ -299,6 +299,26 @@ class GetStatsSexChartView(ViewSet):
         if profs:
             res = [
                 # { "name": "Total", "count": profs.count(), "percent": 100 },
+                { "name": "Male", "count": maleProfs, "percent": round( (maleProfs/profs.count()) * 100) },
+                { "name": "Female", "count": femaleProfs, "percent": round( (femaleProfs/profs.count()) * 100) },
+            ]
+        
+        return Response(res)
+
+
+class GetStatsUsersSexChartView(ViewSet):
+    http_method_names = [ "get" ]
+
+    def list(self, request):
+        param = querydict_to_dict(self.request.query_params)
+        searchSchool= param.pop("school", None)
+        role = param.pop("role", None)
+        profs = CustomUser.objects.filter(role=role, is_active=True, school__id=searchSchool, is_staff=False)
+        maleProfs = profs.filter(sex="Male").count()
+        femaleProfs = profs.filter(sex="Female").count()
+        res = []
+        if profs:
+            res = [
                 { "name": "Male", "count": maleProfs, "percent": round( (maleProfs/profs.count()) * 100) },
                 { "name": "Female", "count": femaleProfs, "percent": round( (femaleProfs/profs.count()) * 100) },
             ]

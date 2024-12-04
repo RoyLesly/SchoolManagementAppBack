@@ -6,7 +6,7 @@ now = datetime.now()
 
         
 def create_school_identification(sender, **kwargs):
-    module_school_iden = importlib.import_module("higher_control.app_control").models.SchoolIdentification
+    module_school_iden = importlib.import_module("higher_control.app_control").models.SchoolIdentificationHigher
     print(11, module_school_iden)
     if kwargs['created']:
         if not module_school_iden.objects.all():

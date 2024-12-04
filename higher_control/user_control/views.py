@@ -2,6 +2,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 from django.contrib.auth.models import Group, Permission
 from .models import *
+from back.middleware import *
 from back.utils import *
 from higher_control.user_control.serializers import *
 from higher_control.app_control.serializers import UserProfileSerializer
@@ -10,7 +11,6 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,)
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
-from back.utils import get_query
 from django_filters import rest_framework as filters
 from .filters import *
 from higher_control.noti_control.views import add_user_activity
@@ -19,7 +19,8 @@ from django.shortcuts import redirect
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
-    # authentication_classes = (CsrfExemptSessionAuthentication)
+    permission_classes = [IsAuthenticatedWithAPIKey]
+    pass
 
 
 
