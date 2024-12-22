@@ -17,7 +17,7 @@ class TenantFilter(django_filters.FilterSet):
         model = Tenant
 
 
-class DomainFilter(django_filters.FilterSet):
+class DomFilter(django_filters.FilterSet):
     id = django_filters.NumberFilter(lookup_expr="exact")
     tenant__id = django_filters.NumberFilter(lookup_expr="icontains")
     tenant__user__id = django_filters.NumberFilter(lookup_expr="icontains")

@@ -69,8 +69,8 @@ def verify_token(bearer):
 
 
 class CustomPagination(PageNumberPagination):
-    page_size = 50
-    max_page_size = 50
+    page_size = 100
+    max_page_size = 100
     page_size_query_param = "size"
     page_query_param = "page"
 

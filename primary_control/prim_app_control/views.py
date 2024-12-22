@@ -1,6 +1,4 @@
-from rest_framework.viewsets import ModelViewSet, ViewSet
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 from back.utils import *
 from .serializers import *
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser

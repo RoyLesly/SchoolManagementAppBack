@@ -1,4 +1,4 @@
-import importlib
+import importlib, os
 from datetime import datetime
 from django.core.files import File
 from qrcode import make
@@ -79,11 +79,23 @@ def create_appearance(sender, **kwargs):
 
 
 def create_code_profile(sender, **kwargs):
+
+    #function to clear all
+    '''
+    Just update a User Profile, It will clear all the userprofile.code field
+    Then Delete the files manually
+    '''
+    # UserProfile = importlib.import_module("higher_control.user_control").models.UserProfile
+    # UserProfile.objects.exclude(code=None).update(code=None)
+
+
     instance_user_profile = kwargs["instance"]
     instance_user_profile.matricle = instance_user_profile.user.matricle
+
     if instance_user_profile.code:
-        pass
+            pass
     else:
+        pass
         if instance_user_profile.specialty:
             if instance_user_profile.specialty.school:
                 if instance_user_profile.specialty.school.school_identification:

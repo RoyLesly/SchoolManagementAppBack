@@ -10,8 +10,8 @@ router = routers.DefaultRouter(trailing_slash=False)
 
 router.register('tenant',  TenantView, "tenant" ),
 router.register('get-tenant',  GetTenantView, "get-tenant" ),
-router.register('domain',  DomainView, "domain" ),
-router.register('get-domain',  GetDomainView, "get-domain" ),
+router.register('domain',  DomView, "domain" ),
+router.register('get-domain',  GetDomView, "get-domain" ),
 
 
 urlpatterns = [

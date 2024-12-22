@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import Group, Permission
 from .models import *
-from higher_control.user_control.serializers import CustomUserSerializer, GetCustomUserSerializer
+from higher_control.user_control.serializersGet import CustomUserSerializer
 from higher_control.user_control.models import UserProfile
 
 

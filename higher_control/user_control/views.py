@@ -298,42 +298,6 @@ class ResetPasswordView(ModelViewSet):
         except:
             return Response({"error": "Operation Failed"})  
 
-
-class AssignGroupsToUserView(ModelViewSet):
-    http_method_names = ["put"]
-    queryset = CustomUser.objects.all()
-    serializer_class = AssignGroupsToUserSerializer
-
-    def update(self, request, pk=None):
-        data = request.data["payload"]
-        object = self.get_object()
-        perm_check = "auth.change_group"
-        check_permission(request.data["payload"]["created_by_id"], perm_check)
-        serializer = self.serializer_class(data=data, instance=object)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"success": serializer.data}) 
-        return Response({"errors": serializer.errors }) 
-    
-
-class AssignPermissionsGroupView(ModelViewSet):
-
-    http_method_names = ["put"]
-    queryset = Group.objects.all()
-    serializer_class = AssignPermissionsToGroupSerializer
-
-    def update(self, request, pk=None):
-        perm_check = "auth.change_permission"        
-        check_permission(request.data["payload"]["created_by_id"], perm_check)
-        data = request.data["payload"]
-        object = self.get_object()
-        serializer = self.serializer_class(data=data, instance=object)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"success": serializer.data}) 
-        raise Exception(serializer.errors)
-        return Response({"errors": serializer.errors }) 
-   
         
 def user_verify_email(request, pk):
     user = CustomUser.objects.get(pk=pk)

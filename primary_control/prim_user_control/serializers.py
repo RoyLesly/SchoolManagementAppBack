@@ -1,9 +1,4 @@
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
-from higher_control.user_control.models import *
-from datetime import datetime
 # import importlib
 
 

@@ -1,7 +1,6 @@
 from rest_framework import serializers
-# from .models import *
 from .models import Domain as Dom, Tenant
-from higher_control.user_control.serializers import CustomUserSerializer, GetCustomUserSerializer
+from higher_control.user_control.serializers import CustomUserSerializer, CustomUser
 
 
 class TenantSerializer(serializers.ModelSerializer):
@@ -19,7 +18,7 @@ class TenantSerializer(serializers.ModelSerializer):
         dept = 1
 
 
-class DomainSerializer(serializers.ModelSerializer):
+class DomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dom
@@ -29,6 +28,19 @@ class DomainSerializer(serializers.ModelSerializer):
 
 
 # LIST SERIALIZERS =======================================================================================================
+def validate_user_exists(attrs):
+    created_by_id = attrs.get('created_by_id')
+    updated_by_id = attrs.get('updated_by_id')
+    if created_by_id:
+        user_id = created_by_id
+    if updated_by_id:
+        user_id = updated_by_id
+    try:
+        pass
+        # return CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        raise serializers.ValidationError("User with ID {} does not exist.".format(user_id))
+
 
 
 class GetTenantSerializer(serializers.Serializer):
@@ -43,7 +55,7 @@ class GetTenantSerializer(serializers.Serializer):
     created_on = serializers.CharField(read_only=True)
 
 
-class GetDomainSerializer(serializers.Serializer):
+class GetDomSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     domain = serializers.CharField(read_only=True)
     tenant__id = serializers.IntegerField(read_only=True)

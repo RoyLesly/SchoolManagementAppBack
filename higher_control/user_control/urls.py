@@ -35,9 +35,6 @@ router.register("create-password", CreatePasswordView, "create-password")
 router.register("update-password", UpdatePasswordView, "update-password")
 # router.register("reset-password", ResetPasswordView, "reset-password")
 
-router.register("assign-group-to-user", AssignGroupsToUserView, "assign-group-to-user")
-router.register("assign-permissions-to-group", AssignPermissionsGroupView, "assign-permissions-to-group")
-
 urlpatterns = [
     path('', include(router.urls)),
     path('check-password', CheckPasswordView.as_view(), name="check-password"),

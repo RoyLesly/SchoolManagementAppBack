@@ -16,9 +16,9 @@ admin.site.register(ActivationKey, ActivationKeyAdmin)
 
 class SchoolFeesAdmin(ImportExportModelAdmin):
     resource_class = SchoolFeesResource
-    list_display = ("id", "userprofile", "platform_charges", "platform_paid", "balance", "created_at", "updated_at")
+    list_display = ("id", "userprofile", "platform_paid", "balance", "created_at", "updated_at")
     search_fields = ("id", "userprofile__user__matricle", "userprofile__user__full_name", "userprofile__user__username", "userprofile__specialty__main_specialty__specialty_name", "userprofile__specialty__academic_year", "userprofile__specialty__level__level",)
-    list_filter = ("id", "userprofile__specialty__school__campus", "userprofile__specialty__main_specialty__specialty_name", "userprofile__specialty__academic_year", "userprofile__specialty__level__level",)
+    list_filter = ("id", "userprofile__specialty__school__campus", "userprofile__user__matricle", "userprofile__specialty__main_specialty__specialty_name", "userprofile__specialty__academic_year", "userprofile__specialty__level__level",)
 admin.site.register(SchoolFees, SchoolFeesAdmin)
 
 

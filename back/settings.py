@@ -33,6 +33,18 @@ REST_FRAMEWORK = {
     ],
 }
 
+GRAPHENE = {
+    'SCHEMA': 'back.schema.schema'  # Update 'myapp' to match your app's name
+}
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',  # No caching
+#     }
+# }
+
+
+
 SHARED_APPS = [
     'django_tenants',  # mandatory
     'tenant',
@@ -47,6 +59,7 @@ SHARED_APPS = [
     'django.contrib.staticfiles',
 
     'django_filters',
+    'graphene_django',
     'rest_framework',
     'rest_framework_simplejwt',
     # "rest_framework_api_key",
@@ -128,6 +141,10 @@ MIDDLEWARE = [
     'django_tenants.middleware.main.TenantMainMiddleware',
     # custom tenant middleware
     'back.middleware.TenantMiddleware',
+    #'back.middleware.RestrictGraphQLMiddleware',
+    #'back.middleware.DisableGraphQLCacheMiddleware',
+    # 'back.middleware.disable_browser_cache_middleware',
+    'back.middleware.CustomCacheMiddleware',
 
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -212,7 +229,9 @@ USE_I18N = True
 USE_TZ = False
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/home/cp2281266p21/public_html/back/static'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     "CLASS": "django_rest_passwordreset.tokens.RandomNumberTokenGenerator",

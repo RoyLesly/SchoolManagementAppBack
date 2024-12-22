@@ -1,7 +1,4 @@
 from rest_framework.viewsets import ModelViewSet, ViewSet
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from django.db.models import Q, Sum, F, Case, When, Value
 from back.utils import *
 from .serializers import *
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -35,14 +32,14 @@ class GetTenantView(ModelViewSet):
         return super().paginate_queryset(queryset)
 
 
-class GetDomainView(ModelViewSet):
+class GetDomView(ModelViewSet):
     http_method_names = [ "get" ]
     queryset = Domain.objects.all().order_by("id")
-    serializer_class = GetDomainSerializer
+    serializer_class = GetDomSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     pagination_class = CustomPagination
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = DomainFilter
+    filterset_class = DomFilter
     # permission_classes = [ IsAuthenticated ]
 
     def get_queryset(self):

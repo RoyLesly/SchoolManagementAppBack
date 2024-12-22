@@ -57,13 +57,18 @@ class SchoolInfoHigherFilter(filters.FilterSet):
     niu = filters.CharFilter(lookup_expr='icontains')
     website = filters.CharFilter(lookup_expr='icontains')
     telephone = filters.CharFilter(lookup_expr='icontains')
+
+    created_by_id = filters.NumberFilter(field_name='created_by__id', lookup_expr="exact")
+    updated_by_id = filters.NumberFilter(field_name='updated_by__id', lookup_expr="exact")
+    created_by_full_name = filters.CharFilter(field_name='created_by__full_name', lookup_expr="icontains")
+    updated_by_full_name = filters.CharFilter(field_name='updated_by__full_name', lookup_expr="icontains") 
     created_at = filters.DateTimeFromToRangeFilter()
     updated_at = filters.DateTimeFromToRangeFilter()
 
     class Meta:
         model = SchoolInfoHigher
         fields = [
-            'campus', 'school_identification_id', 'version', 'platform_charges',
+            'id', 'campus', 'school_identification_id', 'version', 'platform_charges',
             'school_name', 'short_name', 'main_school', 'address', 'town',
             'region', 'country', 'po_box', 'email', 'niu', 'website', 'telephone',
             'created_at', 'updated_at'
@@ -84,8 +89,12 @@ class FieldFilter(filters.FilterSet):
     field_name = filters.CharFilter(lookup_expr='icontains')
     domain_id = filters.NumberFilter(field_name='domain__id')
     domain_name = filters.CharFilter(field_name='domain__domain_name', lookup_expr='icontains')
-    created_at = filters.DateTimeFromToRangeFilter()
-    updated_at = filters.DateTimeFromToRangeFilter()
+       
+    created_by_id = filters.NumberFilter(field_name='created_by__id', lookup_expr="exact")
+    updated_by_id = filters.NumberFilter(field_name='updated_by__id', lookup_expr="exact")
+    created_by_full_name = filters.CharFilter(field_name='created_by__full_name', lookup_expr="icontains")
+    updated_by_full_name = filters.CharFilter(field_name='updated_by__full_name', lookup_expr="icontains")
+     
 
     class Meta:
         model = Field
@@ -100,9 +109,12 @@ class MainSpecialtyFilter(filters.FilterSet):
     field_name = filters.CharFilter(field_name="field__field_name", lookup_expr="icontains")
     domain_id = filters.NumberFilter(field_name="field__domain__id", lookup_expr="exact")
     domain_name = filters.CharFilter(field_name="field__domain__domain_name", lookup_expr="icontains")
-    created_at = filters.DateFilter(lookup_expr="exact")
-    created_by = filters.NumberFilter(field_name="created_by__id", lookup_expr="exact")
-    updated_by = filters.NumberFilter(field_name="updated_by__id", lookup_expr="exact")
+      
+    created_by_id = filters.NumberFilter(field_name='created_by__id', lookup_expr="exact")
+    updated_by_id = filters.NumberFilter(field_name='updated_by__id', lookup_expr="exact")
+    created_by_full_name = filters.CharFilter(field_name='created_by__full_name', lookup_expr="icontains")
+    updated_by_full_name = filters.CharFilter(field_name='updated_by__full_name', lookup_expr="icontains")
+     
 
     class Meta:
         model = MainSpecialty
@@ -122,29 +134,37 @@ class MainSpecialtyFilter(filters.FilterSet):
 
 class SpecialtyFilter(filters.FilterSet):
     id = filters.NumberFilter(lookup_expr="exact")
+    domain_id = filters.NumberFilter(field_name="main_specialty__field__domain__id", lookup_expr="exact")
+    domain_name = filters.CharFilter(field_name="main_specialty__field__domain__domain_name", lookup_expr="icontains")
+    field_id = filters.NumberFilter(field_name="main_specialty__field__id", lookup_expr="exact")
+    field_name = filters.CharFilter(field_name="main_specialty__field__field_name", lookup_expr="icontains")
+    school_id = filters.NumberFilter(field_name="school__id", lookup_expr="exact")
+    school_campus = filters.CharFilter(field_name="school__campus", lookup_expr="icontains")
     school_id = filters.NumberFilter(field_name="school__id", lookup_expr="exact")
     school_campus = filters.CharFilter(field_name="school__campus", lookup_expr="icontains")
     academic_year = filters.CharFilter(lookup_expr="icontains")
     tuition = filters.NumberFilter(lookup_expr="exact")
     registration = filters.NumberFilter(lookup_expr="exact")
     level_id = filters.NumberFilter(field_name="level__id", lookup_expr="exact")
-    level_level = filters.NumberFilter(field_name="level__level", lookup_expr="exact")
-    main_specialty_id = filters.NumberFilter(field_name="main_specialty__id", lookup_expr="exact")
-    main_specialty_name = filters.CharFilter(field_name="main_specialty__specialty_name", lookup_expr="icontains")
+    level = filters.NumberFilter(field_name="level__level", lookup_expr="exact")
+    specialty_name = filters.CharFilter(field_name="main_specialty__specialty_name", lookup_expr="icontains")
 
     class Meta:
         model = Specialty
         fields = [
             "id",
+            "domain_id",
+            "domain_name",
+            "field_id",
+            "field_name",
             "school_id",
             "school_campus",
             "academic_year",
             "tuition",
             "registration",
             "level_id",
-            "level_level",
-            "main_specialty_id",
-            "main_specialty_name",
+            "level",
+            "specialty_name",
         ]
 
 
@@ -166,15 +186,20 @@ class MainCourseFilter(filters.FilterSet):
 
 class CourseFilter(filters.FilterSet):
     id = filters.NumberFilter(lookup_expr="exact")
+    course_name = filters.CharFilter(lookup_expr="icontains")
     course_code = filters.CharFilter(lookup_expr="icontains")
     course_type = filters.CharFilter(lookup_expr="exact")
     semester = filters.CharFilter(lookup_expr="exact")
     course_credit = filters.NumberFilter(lookup_expr="exact")
     specialty_id = filters.NumberFilter(field_name="specialty__id", lookup_expr="exact")
     specialty_name = filters.CharFilter(field_name="specialty__main_specialty__specialty_name", lookup_expr="icontains")
+    course_name = filters.CharFilter(field_name="main_course__course_name", lookup_expr="icontains")
     school_id = filters.NumberFilter(field_name="specialty__school__id", lookup_expr="exact")
+    academic_year = filters.CharFilter(field_name="specialty__academic_year", lookup_expr="exact")
+    level_id = filters.NumberFilter(field_name="specialty__level__id", lookup_expr="exact")
+    level = filters.NumberFilter(field_name="specialty__level__level", lookup_expr="exact")
     school_campus = filters.CharFilter(field_name="specialty__school__campus", lookup_expr="icontains")
-    assigned_to = filters.NumberFilter(field_name="assigned_to__id", lookup_expr="exact")
+    assigned_to_id = filters.NumberFilter(field_name="assigned_to__id", lookup_expr="exact")
     completed = filters.BooleanFilter(lookup_expr="exact")
     paid = filters.BooleanFilter(lookup_expr="exact")
 
@@ -182,6 +207,7 @@ class CourseFilter(filters.FilterSet):
         model = Course
         fields = [
             "id",
+            "course_name",
             "course_code",
             "course_type",
             "semester",
@@ -189,8 +215,11 @@ class CourseFilter(filters.FilterSet):
             "specialty_id",
             "specialty_name",
             "school_id",
+            "academic_year",
+            "level_id",
+            "level",
             "school_campus",
-            "assigned_to",
+            "assigned_to_id",
             "completed",
             "paid",
         ]
@@ -238,12 +267,23 @@ class CourseModuleDetailFilter(filters.FilterSet):
 class ResultFilter(filters.FilterSet):
     id = filters.NumberFilter(lookup_expr="exact")
     domain_id = filters.NumberFilter(field_name="course__specialty__main_specialty__field__domain__id", lookup_expr="exact")
+    domain_name = filters.CharFilter(field_name="course__specialty__main_specialty__field__domain__domain_name", lookup_expr="icontains")
     field_id = filters.NumberFilter(field_name="course__specialty__main_specialty__field__id", lookup_expr="exact")
     specialty_id = filters.NumberFilter(field_name="course__specialty__id", lookup_expr="exact")
+    specialty_name = filters.CharFilter(field_name="specialty__main_specialty__specialty_name", lookup_expr="icontains")
     level_id = filters.NumberFilter(field_name="course__specialty__level__id", lookup_expr="exact")
+    level = filters.NumberFilter(field_name="course__specialty__level__level", lookup_expr="exact")
+    academic_year = filters.CharFilter(field_name="course__specialty__level__level", lookup_expr="iexact")
     school_id = filters.NumberFilter(field_name="course__specialty__school__id", lookup_expr="exact")
+    campus = filters.CharFilter(field_name="course__specialty__campus", lookup_expr="icontains")
+    course_name = filters.CharFilter(field_name="course__main_course__course_name", lookup_expr="icontains")
+    course_id = filters.NumberFilter(field_name="course__id", lookup_expr="exact")
+    semester = filters.CharFilter(field_name="course__semester", lookup_expr="iexact")
     assigned_to_id = filters.NumberFilter(field_name="course__assigned_to__id", lookup_expr="exact")
-    student_id = filters.CharFilter(field_name="student__id", lookup_expr="exact")
+    user_id = filters.CharFilter(field_name="student__user__id", lookup_expr="icontains")
+    full_name = filters.CharFilter(field_name="student__user__full_name", lookup_expr="icontains")
+    matricle = filters.CharFilter(field_name="student__user__matricle", lookup_expr="icontains")
+    student_id = filters.NumberFilter(field_name="student__id", lookup_expr="exact")
 
     ca = filters.NumberFilter(lookup_expr="exact")
     exam = filters.NumberFilter(lookup_expr="exact")
@@ -257,19 +297,25 @@ class ResultFilter(filters.FilterSet):
     closed = filters.BooleanFilter(lookup_expr="exact")
     active = filters.BooleanFilter(lookup_expr="exact")
 
-    created_by_id = filters.NumberFilter(field_name="created_by__id", lookup_expr="exact")
-    updated_by_id = filters.NumberFilter(field_name="updated_by__id", lookup_expr="exact")
+    created_by_id = filters.NumberFilter(field_name='created_by__id', lookup_expr="exact")
+    updated_by_id = filters.NumberFilter(field_name='updated_by__id', lookup_expr="exact")
+    created_by_full_name = filters.CharFilter(field_name='created_by__full_name', lookup_expr="icontains")
+    updated_by_full_name = filters.CharFilter(field_name='updated_by__full_name', lookup_expr="icontains")
+     
 
     class Meta:
         model = Result
         fields = [
             "id",
-            "domain_id",
-            "field_id",
-            "specialty_id",
-            "level_id",
-            "school_id",
+            "domain_id", 'domain_name',"field_id", "specialty_id", 'specialty_name', "level_id", 'level', 'academic_year',
+            "school_id", 'campus',
+            'course_name',
+            'course_id',
+            'semester',
             "assigned_to_id",
+            'user_id',
+            "full_name",
+            "matricle",
             "student_id",
             "ca",
             "exam",
@@ -288,12 +334,17 @@ class ResultFilter(filters.FilterSet):
 
 class PublishFilter(filters.FilterSet):
     id = filters.NumberFilter(lookup_expr="exact")
+    domain_id = filters.NumberFilter(field_name="domain_id", lookup_expr="exact")
+    domain_name = filters.CharFilter(field_name="specialty__main_specialty__field__domain__domain_name", lookup_expr="icontains")
     specialty_id = filters.NumberFilter(field_name="specialty__id", lookup_expr="exact")
+    specialty_name = filters.CharFilter(field_name="specialty__main_specialty__specialty_name", lookup_expr="icontains")
     school_id = filters.NumberFilter(field_name="specialty__school__id", lookup_expr="exact")
-    level = filters.NumberFilter(field_name="specialty__level__level", lookup_expr="exact")
+    campus = filters.CharFilter(field_name="specialty__school__campus", lookup_expr="icontains")
+    region = filters.CharFilter(field_name="specialty__school__region", lookup_expr="icontains")
+    level = filters.NumberFilter(field_name="specialty__level__level", lookup_expr='exact')
     academic_year = filters.CharFilter(field_name="specialty__academic_year", lookup_expr="icontains")
 
-    semester = filters.CharFilter(lookup_expr="exact")
+    semester = filters.CharFilter(lookup_expr="iexact")
     ca = filters.BooleanFilter(lookup_expr="exact")
     exam = filters.BooleanFilter(lookup_expr="exact")
     resit = filters.BooleanFilter(lookup_expr="exact")
@@ -301,26 +352,28 @@ class PublishFilter(filters.FilterSet):
     portal_exam = filters.BooleanFilter(lookup_expr="exact")
     portal_resit = filters.BooleanFilter(lookup_expr="exact")
 
-    created_by_id = filters.NumberFilter(field_name="created_by__id", lookup_expr="exact")
-    updated_by_id = filters.NumberFilter(field_name="updated_by__id", lookup_expr="exact")
+    created_by_id = filters.NumberFilter(field_name='created_by__id', lookup_expr="exact")
+    updated_by_id = filters.NumberFilter(field_name='updated_by__id', lookup_expr="exact")
+    created_by_full_name = filters.CharFilter(field_name='created_by__full_name', lookup_expr="icontains")
+    updated_by_full_name = filters.CharFilter(field_name='updated_by__full_name', lookup_expr="icontains")
+     
 
     class Meta:
         model = Publish
         fields = [
-            "id",
-            "specialty_id",
-            "school_id",
-            "level",
-            "academic_year",
-            "semester",
-            "ca",
-            "exam",
-            "resit",
-            "portal_ca",
-            "portal_exam",
-            "portal_resit",
-            "created_by_id",
+            'id', 
+            'domain_id', 'domain_name', 'specialty_id','specialty_name', 'school_id', 'campus', 'region', 'level', 'academic_year',
+            'semester', 
+            'ca', 
+            'exam', 
+            'resit', 
+            'portal_ca', 
+            'portal_exam', 
+            'portal_resit', 
+            'created_by_id',
             "updated_by_id",
+            'created_by_full_name',
+            "updated_by_full_name",        
         ]
 
 class LevelFilter(filters.FilterSet):

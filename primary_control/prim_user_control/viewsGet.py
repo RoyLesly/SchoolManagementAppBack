@@ -17,7 +17,7 @@ from .filters import *
 class GetPrimaryProfileView(ModelViewSet):
     http_method_names = [ "get" ]
     queryset = UserProfile.objects.all().order_by("-created_at")
-    serializer_class = GetUserProfileSerializer
+    # serializer_class = GetUserProfileSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     pagination_class = CustomPagination
     filter_backends = (filters.DjangoFilterBackend,)

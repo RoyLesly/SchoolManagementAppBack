@@ -41,6 +41,7 @@ class PublishAdmin(ImportExportModelAdmin):
     resource_class = PublishResource
     list_display = ("id", "specialty", "semester", "ca", "exam", "resit", "portal_ca", "portal_exam", "portal_resit", "created_at", "updated_at", "updated_by")
     search_fields = ("id", "specialty",)
+    list_filter = ("semester", "specialty__academic_year", "specialty__level__level", "specialty__school__campus", "specialty__main_specialty__field__domain__domain_name")
 admin.site.register(Publish, PublishAdmin)
 
 
@@ -93,7 +94,7 @@ class ResultAdmin(ImportExportModelAdmin):
     list_display = ("id", "student", "course", "ca", "exam", "resit", "average", "validated", "active",
                     "publish_ca", "publish_exam", "publish_resit","closed", "created_at", "updated_at", "updated_by")
     search_fields = ("student__user__username", "student__user__matricle", "student__user__first_name", "course__main_course__course_name",)
-    list_filter = ("student__user__username", "student__user__matricle", "student__user__first_name", "course__main_course__course_name", "course__specialty__level__level", "course__specialty__school__campus",)
+    list_filter = ("student__user__username", "student__user__matricle", "student__user__first_name", "course__main_course__course_name", "course__assigned_to__matricle", "course__specialty__level__level", "course__specialty__school__campus",)
 admin.site.register(Result, ResultAdmin)
 
 

@@ -3,45 +3,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from back.utils import *
 from .serializersGet import *
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from .filters import *
 from django_filters import rest_framework as filters
-
-
-class BaseGetViewSet(ModelViewSet):
-    """
-    A base viewset to handle common functionality for 'GET' requests.
-    """
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = CustomPagination
-    filter_backends = (filters.DjangoFilterBackend,)
-
-    def get_queryset(self):
-        param = querydict_to_dict(self.request.query_params)
-        fieldList = param.pop("fieldList", None)
-        queryset = super().get_queryset()
-
-        # Handle field selection dynamically
-        if fieldList:
-            fieldList = fieldList.split(',')
-            queryset = queryset.values(*fieldList)
-
-        return queryset
-
-    def paginate_queryset(self, queryset):
-        param = querydict_to_dict(self.request.query_params)
-        nopage = param.pop("nopage", None)
-        if nopage:
-            return None
-        return super().paginate_queryset(queryset)
-
-    def perform_query_optimization(self, queryset, related_fields=None):
-        """
-        Perform query optimizations like select_related or prefetch_related.
-        """
-        if related_fields:
-            queryset = queryset.select_related(*related_fields)
-        return queryset
+from tenant.views import BaseGetViewSet
 
 
 class GetSchoolIdentificationView(BaseGetViewSet):
@@ -57,11 +21,27 @@ class GetSchoolInfoView(BaseGetViewSet):
     serializer_class = GetSchoolInfoSerializer
     filterset_class = SchoolInfoHigherFilter
 
+
+class GetSchoolSettingsView(ModelViewSet):
+    http_method_names = ["get"]
+    queryset = SchoolInfoHigher.objects.all().order_by("-created_at")
+    serializer_class = GetSchoolSettingSerializer
+    filterset_class = SchoolInfoHigherFilter
+
     def get_queryset(self):
-        queryset = super().get_queryset()
-        # Optimize query by including related foreign keys
-        queryset = self.perform_query_optimization(queryset, related_fields=["school_identification"])
-        return queryset
+        param = querydict_to_dict(self.request.query_params)
+        fieldList = param.pop("fieldList", None)
+        if fieldList:
+            fieldList = fieldList.split(',')
+            return self.queryset.values(*fieldList)
+        return super().get_queryset()
+    
+    def paginate_queryset(self, queryset):
+        param = querydict_to_dict(self.request.query_params)
+        nopage = param.pop("nopage", None)
+        if nopage:
+            return None
+        return super().paginate_queryset(queryset)
 
 
 class GetDomainView(BaseGetViewSet):
@@ -78,6 +58,11 @@ class GetFieldView(BaseGetViewSet):
     serializer_class = GetFieldSerializer
     filterset_class = FieldFilter
 
+    # def get_queryset(self):
+    #     queryset = super().get_queryset()
+    #     queryset = self.perform_query_optimization(queryset, related_fields=["domain"])
+    #     return queryset
+
 
 class GetMainSpecialtyView(BaseGetViewSet):
     http_method_names = [ "get" ]
@@ -85,6 +70,11 @@ class GetMainSpecialtyView(BaseGetViewSet):
     serializer_class = GetMainSpecialtySerializer
     filterset_class = MainSpecialtyFilter
     # permission_classes = [ IsAuthenticated ]
+
+    # def get_queryset(self):
+    #     queryset = super().get_queryset()
+    #     queryset = self.perform_query_optimization(queryset, related_fields=["field"])
+    #     return queryset
     
     
 class GetSpecialtyView(BaseGetViewSet):
@@ -95,7 +85,7 @@ class GetSpecialtyView(BaseGetViewSet):
     # permission_classes = [ IsAuthenticated ]
 
 
-class GetMainCourseView(ModelViewSet):
+class GetMainCourseView(BaseGetViewSet):
     http_method_names = [ "get" ]
     queryset = MainCourse.objects.all().order_by("-created_at")
     serializer_class = GetMainCourseSerializer
@@ -108,6 +98,11 @@ class GetCourseView(BaseGetViewSet):
     serializer_class = GetCourseSerializer
     filterset_class = CourseFilter
     # permission_classes = [ IsAuthenticated ]
+
+    # def get_queryset(self):
+    #     queryset = super().get_queryset()
+    #     queryset = self.perform_query_optimization(queryset, related_fields=["main_course"])
+    #     return queryset
     
 
 class GetCourseUploadView(ModelViewSet):
@@ -148,7 +143,7 @@ class GetResultView(BaseGetViewSet):
     serializer_class = GetResultSerializer
     filterset_class = ResultFilter
     # permission_classes = [ IsAuthenticated ]
-
+    
 
 class GetResultTranscriptView(BaseGetViewSet):
     http_method_names = [ "get" ]
@@ -261,83 +256,29 @@ class GetResultTranscriptView(BaseGetViewSet):
         })
 
 
-class GetPublishView(ModelViewSet):
+class GetPublishView(BaseGetViewSet):
     http_method_names = [ "get" ]
     queryset = Publish.objects.all().order_by("-created_at")
     serializer_class = GetPublishSerializer
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = CustomPagination
-    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PublishFilter
     # permission_classes = [ IsAuthenticated ]
 
-    def get_queryset(self):
-        param = querydict_to_dict(self.request.query_params)
-        fieldList = param.pop("fieldList", None)
-        if fieldList:
-            fieldList = fieldList.split(',')
-            return self.queryset.values(*fieldList)
-        return super().get_queryset()
 
-    def paginate_queryset(self, queryset):
-        param = querydict_to_dict(self.request.query_params)
-        nopage = param.pop("nopage", None)
-        if nopage:
-            return None
-        return super().paginate_queryset(queryset)
-    
-
-class GetSysCategoryView(ModelViewSet):
+class GetSysCategoryView(BaseGetViewSet):
     http_method_names = [ "get" ]
     queryset = SysCategory.objects.all().order_by("name")
     serializer_class = GetSysCategorySerializer
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = CustomPagination
-    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = SysCategoryFilter
     # permission_required = ('app_control.view_schoolinfo')
-
-    def get_queryset(self):
-        param = querydict_to_dict(self.request.query_params)
-        fieldList = param.pop("fieldList", None)
-        if fieldList:
-            fieldList = fieldList.split(',')
-            return self.queryset.values(*fieldList)
-        return super().get_queryset()
-
-    def paginate_queryset(self, queryset):
-        param = querydict_to_dict(self.request.query_params)
-        nopage = param.pop("nopage", None)
-        if nopage:
-            return None
-        return super().paginate_queryset(queryset)
         
         
-class GetSysConstantView(ModelViewSet):
+class GetSysConstantView(BaseGetViewSet):
     http_method_names = [ "get" ]
     queryset = SysConstant.objects.all().order_by("name")
     serializer_class = GetSysConstantSerializer
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = CustomPagination
-    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = SysConstantFilter
     # permission_required = ('app_control.view_schoolinfo')
 
-    def get_queryset(self):
-        param = querydict_to_dict(self.request.query_params)
-        fieldList = param.pop("fieldList", None)
-        if fieldList:
-            fieldList = fieldList.split(',')
-            return self.queryset.values(*fieldList)
-        return super().get_queryset()
-
-    def paginate_queryset(self, queryset):
-        param = querydict_to_dict(self.request.query_params)
-        nopage = param.pop("nopage", None)
-        if nopage:
-            return None
-        return super().paginate_queryset(queryset)
-        
 
 class GetSemesterView(ViewSet):
     # permission_classes = [ IsAuthenticated ]

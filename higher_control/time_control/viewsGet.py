@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 from .models import *
 from back.utils import *
-from .serializers import *
+from .serializersGet import *
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
 from django_filters import rest_framework as filters

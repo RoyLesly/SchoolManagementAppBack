@@ -8,8 +8,8 @@ from django.contrib.auth.admin import UserAdmin
 class UserProfileAdmin(ImportExportModelAdmin):
     resource_class = UserProfileResource
     list_display = ("id", "user", "specialty", "program", "session", "active", "created_at", "updated_at")
-    search_fields = ("specialty__main_specialty__specialty_name", "id", "user__first_name", "user__matricle",)
-    list_filter = ["user__role", "user__is_active", "specialty__academic_year", "program__name", "specialty__id", "specialty__level__level", "user__is_staff", "specialty__school__campus", "specialty__main_specialty__specialty_name"]
+    search_fields = ("specialty__main_specialty__specialty_name", "id", "user__full_name", "user__matricle",)
+    list_filter = ["user__role", "user__is_active", "user__matricle", "user__full_name", "specialty__academic_year", "program__name", "specialty__id", "specialty__level__level", "user__is_staff", "specialty__school__campus", "specialty__main_specialty__specialty_name"]
 admin.site.register(UserProfile, UserProfileAdmin)
 
 
@@ -46,7 +46,7 @@ class CustomUserAdmin(ImportExportModelAdmin):
     list_display = ('id', 'matricle', 'username', "full_name", "role", "email", "email_confirmed", 
                     "hod", "sex", "parent", "address", "telephone", "parent_telephone", "title", "dob", "pob",)
     search_fields = ('id', 'username', "full_name", 'matricle')
-    list_filter = ["role", "is_active", "is_staff", "school__campus"]
+    list_filter = ["role", "matricle", "full_name", "is_active", "is_staff", "school__campus"]
 admin.site.register(CustomUser, CustomUserAdmin)
 
 

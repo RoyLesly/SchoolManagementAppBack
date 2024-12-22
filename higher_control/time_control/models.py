@@ -47,6 +47,8 @@ class TimeTableDay(models.Model):
 
     created_by = models.ForeignKey(CustomUser, null=True, related_name='timetableday_created_by', on_delete=models.SET_NULL)
     created_at = models.DateField(auto_now_add=True)
+    updated_by = models.ForeignKey(CustomUser, null=True, related_name='timetableday_updated_by', on_delete=models.SET_NULL)
+    updated_at = models.DateField(auto_now_add=True)
     
     def __str__(self):
         return f"{self.id}-{self.timetableweek.year_week}"

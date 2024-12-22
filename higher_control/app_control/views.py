@@ -4,61 +4,39 @@ from rest_framework.response import Response
 from back.utils import *
 from .serializers import *
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-# from django.contrib.auth.mixins import PermissionRequiredMixin
 from .filters import *
 from django_filters import rest_framework as filters
-
-
-class BaseModelViewSet(ModelViewSet):
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = CustomPagination
-    filter_backends = (filters.DjangoFilterBackend,)
-
-    def get_queryset(self):
-        return self.queryset.order_by("-created_at")
-
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
-
-    def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)
+from tenant.views import BaseModelViewSet
 
 
 class SchoolIdentificationHigherView(BaseModelViewSet):
     http_method_names = ["post", "put", "delete"]
     queryset = SchoolIdentificationHigher.objects.all()
     serializer_class = SchoolIdentificationHigherSerializer
-    filterset_fields = ('id', 'school_name',)
+
 
 class SchoolInfoHigherView(BaseModelViewSet):
     http_method_names = ["post", "put", "delete"]
     queryset = SchoolInfoHigher.objects.all()
     serializer_class = SchoolInfoHigherSerializer
-    filterset_fields = ('id', 'school_name',)
+
 
 class DomainView(BaseModelViewSet):
-    http_method_names = ["get", "post", "put", "delete"]
+    http_method_names = [ "post", "put", "delete"]
     queryset = Domain.objects.all()
     serializer_class = DomainSerializer
-    filterset_class = DomainFilter
+
 
 class FieldView(BaseModelViewSet):
     http_method_names = ["post", "put", "delete"]
     queryset = Field.objects.all()
     serializer_class = FieldSerializer
-    filterset_class = FieldFilter
 
 
-
-
-class MainSpecialtyView(ModelViewSet):
+class MainSpecialtyView(BaseModelViewSet):
     http_method_names = [ "post", "put", "delete"]
     queryset = MainSpecialty.objects.all().order_by("-created_at")
     serializer_class = MainSpecialtySerializer
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = CustomPagination
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = MainSpecialtyFilter
     # permission_classes = [ IsAuthenticated ]
     
     

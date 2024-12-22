@@ -94,7 +94,7 @@ class Specialty(CreatedUpdatedModel):
         ]
 
     def __str__(self):
-        return f"{self.main_specialty.specialty_name} - L{self.level.level} - {self.academic_year}"
+        return f"{self.main_specialty.specialty_name}-L{self.level.level}-{self.academic_year} {self.school.campus}"
 
 post_save.connect(create_publish_from_specialty, sender=Specialty)
 
@@ -187,6 +187,10 @@ class Result(CreatedUpdatedModel):
     publish_resit = models.BooleanField(default=False)
     closed = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(CustomUser, null=True, related_name='result_created_by', on_delete=models.SET_NULL)
+    created_at = models.DateField(auto_now_add=True)
+    updated_by = models.ForeignKey(CustomUser, null=True, related_name='result_updated_by', on_delete=models.SET_NULL)
+    updated_at = models.DateField(auto_now=True)
 
     class Meta:
         constraints = [
@@ -202,15 +206,16 @@ class Result(CreatedUpdatedModel):
         if self.ca:
             total += self.ca
             count += 1
-        if self.exam:
+        if self.exam and not self.resit:
             total += self.exam
             count += 1
         if self.resit:
             total += self.resit
             count += 1
         if count > 0:
-            self.average = total / count
+            self.average = total
             self.validated = self.average >= 50
+
 
     def save(self, *args, **kwargs):
         self.matricle = self.student.user.matricle
@@ -229,7 +234,10 @@ class Publish(CreatedUpdatedModel):
     portal_ca = models.BooleanField(default=False)
     portal_exam = models.BooleanField(default=False)
     portal_resit = models.BooleanField(default=False)
-
+    created_by = models.ForeignKey(CustomUser, null=True, related_name='publish_created_by', on_delete=models.SET_NULL)
+    created_at = models.DateField(auto_now_add=True)
+    updated_by = models.ForeignKey(CustomUser, null=True, related_name='publish_updated_by', on_delete=models.SET_NULL)
+    updated_at = models.DateField(auto_now=True)
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["specialty", "semester"], name="unique_publish")

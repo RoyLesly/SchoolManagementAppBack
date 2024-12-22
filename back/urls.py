@@ -7,6 +7,8 @@ from higher_control.user_control.views import MyTokenObtainPairView
 from django.views.decorators.csrf import csrf_exempt
 from back.views import *
 from rest_framework.routers import DefaultRouter
+from graphene_django.views import GraphQLView
+
 
 router = DefaultRouter()
 
@@ -21,6 +23,9 @@ urlpatterns = [
     path('token/', csrf_exempt(MyTokenObtainPairView.as_view()), name="token"),
     path('token/refresh/', TokenRefreshView.as_view(), name="token_refresh"),
     path('download', download_apk, name="download"),
+    # path('graphql', GraphQLView.as_view(graphiql=True)),  # GraphiQL enabled for testing
+    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
+
 
     # Admin and app-specific URLs
     path('e-admin/', admin.site.urls),
